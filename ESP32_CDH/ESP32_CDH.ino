@@ -14,7 +14,7 @@
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
-int LED_BUILTIN = 2;
+int LED_B = 2;
 
 /********** Server Callback to restart advertising after a subsystem conencts **********/
 class MyServerCallbacks: public BLEServerCallbacks {
@@ -29,7 +29,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
 
 
 void setup() {
-  pinMode (LED_BUILTIN, OUTPUT);                                                // Set Builtin LED to output
+  pinMode (LED_B, OUTPUT);                                                // Set Builtin LED to output
   
   Serial.begin(115200);                                                         // Initialize serial port
   Serial.println("Starting BLE work!");
@@ -56,13 +56,10 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_B, HIGH);
   delay(100);
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_B, LOW);
   delay(100);
 //  put your main code here, to run repeatedly:
 //  delay(2000);
 }
-
-
-
