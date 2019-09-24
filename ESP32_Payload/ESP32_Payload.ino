@@ -13,7 +13,7 @@ static BLEUUID serviceUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
 // The characteristic of the remote service we are interested in.
 static BLEUUID    charUUID("beb5483e-36e1-4688-b7f5-ea07361b26a8");
 
-int LED_BUILTIN = 2;
+int LED = 2;
 
 static boolean doConnect = false;
 static boolean connected = false;
@@ -153,10 +153,10 @@ void loop() {
   if (connected) {
     std::string value = pRemoteCharacteristic->readValue();
     if(value == "PayloadLedOn"){
-      digitalWrite(LED_BUILTIN, HIGH);
+      digitalWrite(LED, HIGH);
     }
     else if(value == "PayloadLedOff"){
-      digitalWrite(LED_BUILTIN, LOW);
+      digitalWrite(LED, LOW);
     }
   }else if(doScan){
     BLEDevice::getScan()->start(0);  // this is just eample to start scan after disconnect, most likely there is better way to do it in arduino
@@ -164,5 +164,3 @@ void loop() {
   
   delay(1000); // Delay a second between loops.
 } // End of loop
-
-
