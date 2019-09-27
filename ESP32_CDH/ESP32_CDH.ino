@@ -19,6 +19,7 @@ int LED_B = 2;
 /********** Server Callback to restart advertising after a subsystem conencts **********/
 class MyServerCallbacks: public BLEServerCallbacks {
   // TODO this doesn't take into account several clients being connected
+    
     void onConnect(BLEServer* pServer) {
       BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
       pAdvertising->start();

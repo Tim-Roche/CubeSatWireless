@@ -115,7 +115,7 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 
 void setup() {
-  pinMode (LED_BUILTIN, OUTPUT);
+  pinMode (LED, OUTPUT);
     
   Serial.begin(115200);
   Serial.println("Starting Arduino BLE Client application...");
