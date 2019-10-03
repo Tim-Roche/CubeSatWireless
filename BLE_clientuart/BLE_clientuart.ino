@@ -9,10 +9,10 @@
 //#include "BLEScan.h"
 
 // The remote service we wish to connect to.
-static BLEUUID serviceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
+static BLEUUID serviceUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
 // The characteristic of the remote service we are interested in.
-static BLEUUID    charUUIDrx("6E400003-B5A3-F393-E0A9-E50E24DCCA9E");
-static BLEUUID    charUUIDtx("6E400002-B5A3-F393-E0A9-E50E24DCCA9E");
+static BLEUUID    charUUIDrx("beb5483e-36e1-4688-b7f5-ea07361b26a8");
+static BLEUUID    charUUIDtx("cb673139-b730-48b0-a7ba-c04458f5328e");
 
 static boolean doConnect = false;
 static boolean connected = false;
@@ -67,6 +67,9 @@ bool connectToServer() {
     }
     Serial.println(" - Found our service");
 
+/////////////////
+
+    //RX
 
     // Obtain a reference to the characteristic in the service of the remote BLE server.
     pRemoteCharacteristicrx = pRemoteService->getCharacteristic(charUUIDrx);
@@ -78,13 +81,7 @@ bool connectToServer() {
     }
     Serial.println(" - Found our characteristic");
 
-    // Read the value of the characteristic.
-    if(pRemoteCharacteristicrx->canRead()) {
-      std::string value = pRemoteCharacteristicrx->readValue();
-      Serial.print("The characteristic value was: ");
-      Serial.println(value.c_str());
-    }
-
+    //TX
 
     pRemoteCharacteristictx = pRemoteService->getCharacteristic(charUUIDtx);
     if (pRemoteCharacteristictx == nullptr) {
@@ -95,17 +92,11 @@ bool connectToServer() {
     }
     Serial.println(" - Found our characteristic");
 
-    // Read the value of the characteristic.
-    if(pRemoteCharacteristictx->canRead()) {
-      std::string value = pRemoteCharacteristictx->readValue();
-      Serial.print("The characteristic value was: ");
-      Serial.println(value.c_str());
-    }
-
     connected = true;
 }
 /**
- * Scan for BLE servers and find the first one that advertises the service we are looking for.
+ * Scan for BLE servers and find the first one that adverti
+ * ses the service we are looking for.
  */
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
  /**

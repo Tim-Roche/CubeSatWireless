@@ -12,9 +12,9 @@
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
-#define CHARACTERISTIC_UUID2 "993921bd-d486-4636-907e-c60c691c05de"
+#define SERVICE_UUID         "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID  "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID2 "cb673139-b730-48b0-a7ba-c04458f5328e"
 
 int LED_B = 2;
 bool deviceConnected = false;
@@ -68,7 +68,7 @@ void setup()
                                        );
 
   pCharacteristicrx = pService->createCharacteristic(          // Create the characteristic UUID for server
-                                         CHARACTERISTIC_UUID,
+                                         CHARACTERISTIC_UUID2,
                                          BLECharacteristic::PROPERTY_READ |
                                          BLECharacteristic::PROPERTY_WRITE
                                        );
@@ -92,13 +92,21 @@ void loop() {
       if(isTest)
         {  
         pCharacteristic->setValue("Test");  
+        Serial.println("Sent: Test!");
         isTest=false;
         }
       else
       {
         pCharacteristic->setValue("Something Else");  
+        Serial.println("Sent: Something Else!");
         isTest=true;
       }
       pCharacteristic->notify();
-}
+      delay(100);
+  }
+  else
+  {
+     Serial.println("Device is not Connected :(");
+  }
+  
 }
