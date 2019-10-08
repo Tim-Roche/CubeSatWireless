@@ -16,7 +16,7 @@
 #define  GYRO_CHAR_1        "f9fd0001-71ae-42c4-bd19-9d5e37ebf073"
 
 #define LIGHT_SERVICE_UUID  "605b0000-0d8f-4002-abb3-3eb9a9c388ea"
-#define  LIGHT_CHAR_1       "f9fd0001-71ae-42c4-bd19-9d5e37ebf073"
+#define  LIGHT_CHAR_1       "605b0001-0d8f-4002-abb3-3eb9a9c388ea"
 
 #define  TEMP_SERVICE_UUID  "b58d0000-066d-4f45-99fa-60c588735e5d"
 #define  TEMP_CHAR_1        "b58d0001-066d-4f45-99fa-60c588735e5d"
@@ -44,11 +44,13 @@ class MyServerCallbacks: public BLEServerCallbacks {
 
 class MyCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
+      std::string uuid = pCharacteristic->getUUID().toString();
       std::string value = pCharacteristic->getValue();
 
       if (value.length() > 0) {
         Serial.println("*********");
-        Serial.print("Received Value: ");
+        Serial.print("From UUID: ");
+        Serial.println(uuid.c_str());
         for (int i = 0; i < value.length(); i++)
           Serial.print(value[i]);
 

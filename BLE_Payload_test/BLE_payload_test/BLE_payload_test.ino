@@ -14,7 +14,7 @@ static        BLEUUID GYRO_CHAR_1("f9fd0001-71ae-42c4-bd19-9d5e37ebf073");
 
 
 static BLEUUID LIGHT_SERVICE_UUID("605b0000-0d8f-4002-abb3-3eb9a9c388ea");
-static        BLEUUID    LIGHT_CHAR_1("f9fd0001-71ae-42c4-bd19-9d5e37ebf073");
+static        BLEUUID    LIGHT_CHAR_1("605b0001-0d8f-4002-abb3-3eb9a9c388ea");
 
 static BLEUUID TEMP_SERVICE_UUID("b58d0000-066d-4f45-99fa-60c588735e5d");
 static        BLEUUID    TEMP_CHAR_1("b58d0001-066d-4f45-99fa-60c588735e5d");
