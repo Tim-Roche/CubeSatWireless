@@ -28,6 +28,7 @@ BLECharacteristic * pTempChar_1;
 
 int LED_B = 2;
 bool deviceConnected = false;
+int t = 0;
 /********** Server Callback to restart advertising after a subsystem conencts **********/
 class MyServerCallbacks: public BLEServerCallbacks {
   // TODO this doesn't take into account several clients being connected
@@ -58,6 +59,31 @@ class MyCallbacks: public BLECharacteristicCallbacks {
         Serial.println("*********");
       }
     }
+
+    void onRead(BLECharacteristic* pCharacteristic) {
+      String uuid = pCharacteristic->getUUID().toString().c_str();
+      Serial.print("Someone wants to read my data: ");
+      Serial.println(uuid.c_str());
+      if(uuid == GYRO_CHAR_1)
+      {
+         String message = "Gyro!"+String(t);
+         Serial.print("Transmitting: ");
+         Serial.println(message.c_str());
+         pCharacteristic->setValue(message.c_str());
+      }
+      else if(uuid == LIGHT_CHAR_1)
+      {
+         pCharacteristic->setValue(("Light!"+String(t*10)).c_str());
+      }
+      else if(uuid == TEMP_CHAR_1)
+      {
+         pCharacteristic->setValue(("Temp!"+String(t*1000)).c_str());
+      }    
+      else
+      {
+        Serial.println("Unknown UUID!");  
+      }
+   }
 };
 
 void setup()
@@ -78,27 +104,36 @@ void setup()
   //Creating Characteristics
   pGryoChar_1 = pGyroService->createCharacteristic(                                // Create the characteristic UUID for server
                                          GYRO_CHAR_1,
-                                         BLECharacteristic::PROPERTY_READ |
-                                         BLECharacteristic::PROPERTY_WRITE
+                                         BLECharacteristic::PROPERTY_READ  |
+                                         BLECharacteristic::PROPERTY_WRITE |
+                                         BLECharacteristic::PROPERTY_NOTIFY |
+                                         BLECharacteristic::PROPERTY_INDICATE
                                        );
+  
   pGryoChar_1->setCallbacks(new MyCallbacks()); 
 
+  //All properties are required for proper functionality
   pLightChar_1 = pLightService->createCharacteristic(                                // Create the characteristic UUID for server
                                          LIGHT_CHAR_1,
                                          BLECharacteristic::PROPERTY_READ |
-                                         BLECharacteristic::PROPERTY_WRITE
+                                         BLECharacteristic::PROPERTY_WRITE |
+                                         BLECharacteristic::PROPERTY_NOTIFY |  
+                                         BLECharacteristic::PROPERTY_INDICATE 
                                        );
   pLightChar_1->setCallbacks(new MyCallbacks()); 
 
   pTempChar_1 = pTempService->createCharacteristic(                                // Create the characteristic UUID for server
                                          TEMP_CHAR_1,
                                          BLECharacteristic::PROPERTY_READ |
-                                         BLECharacteristic::PROPERTY_WRITE
+                                         BLECharacteristic::PROPERTY_WRITE |
+                                         BLECharacteristic::PROPERTY_NOTIFY |
+                                         BLECharacteristic::PROPERTY_INDICATE
                                        );
   pTempChar_1->setCallbacks(new MyCallbacks()); 
 
-  pGryoChar_1->setValue("100"); 
-  pTempChar_1->setValue("250"); 
+  pGryoChar_1->addDescriptor(new BLE2902());
+  pLightChar_1->addDescriptor(new BLE2902());
+  pTempChar_1->addDescriptor(new BLE2902());
 
   pGyroService->start();                                                            // Start service
   pLightService->start();                                                            // Start service
@@ -106,7 +141,6 @@ void setup()
                          
   pServer->setCallbacks(new MyServerCallbacks());                               // Set server callbacks
   
-
   //Advertising
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();                   // Grab advertisiing service
   
@@ -124,34 +158,31 @@ void setup()
 }
 
 bool isTest = true;
+String gValue = "gValue";
+String lValue = "lValue";
+String tValue = "tValue";
+
 void loop() {
   if (deviceConnected) {
- /*   //SENDING
-      if(isTest)
-        {  
-        pGryoChar_1->setValue("100"); 
-        Serial.println("pGryoChar_1 set to: 100"); 
-        delay(10);
-
-        pTempChar_1->setValue("-200");
-        Serial.println("pTempChar_1 set to: -200"); 
-        
-        isTest=false;
-        }
-      else
-      {
-        pGryoChar_1->setValue("5000"); 
-        Serial.println("pGryoChar_1 set to: 5000"); 
-        delay(10);
-
-        pTempChar_1->setValue("2500");
-        Serial.println("pTempChar_1 set to: 2500"); 
-        
-        isTest=false;
-      }*/
+    t++;
+    if(t >= 100000)
+      t = 0;
+    if(t%100 == 0)
+    {
+      Serial.println("Notifying Gyro");
       pGryoChar_1->notify();
+    }
+    if(t%300 == 0)
+    {
+      Serial.println("Notifying Light");
+      pLightChar_1->notify();
+    }
+    if(t%500 == 0)
+    {
+      Serial.println("Notifying Temp");
       pTempChar_1->notify();
-      delay(100);
+    }
+    delay(10);
   }
   else
   {

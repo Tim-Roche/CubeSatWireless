@@ -31,6 +31,9 @@ static BLERemoteCharacteristic* pTempChar_1;
 
 static BLEAdvertisedDevice* myDevice;
 
+boolean newMail = false;
+BLERemoteCharacteristic* newRemoteChar;
+
 static void notifyCallback(
   BLERemoteCharacteristic* pBLERemoteCharacteristic,
   uint8_t* pData,
@@ -42,6 +45,9 @@ static void notifyCallback(
     Serial.println(length);
     Serial.print("data: ");
     Serial.println((char*)pData);
+
+    newRemoteChar = pBLERemoteCharacteristic;
+    newMail = true;
 }
 
 class MyClientCallback : public BLEClientCallbacks {
@@ -110,8 +116,25 @@ bool connectToServer() {
     }
     
     Serial.println("Found our services");
-    
+    Serial.println(pGryoChar_1->canNotify());
+    if(pGryoChar_1->canNotify())
+    {
+      Serial.println("Next Line...");
+      pGryoChar_1->registerForNotify(notifyCallback);
+      Serial.println("Notications for Gyro done!");
+    }
+    /*if(pGryoChar_1->canNotify())
+      pGryoChar_1->registerForNotify(notifyCallback);
+      Serial.println("Notications for Gyro done!");
+    if(pLightChar_1->canNotify())
+      pLightChar_1->registerForNotify(notifyCallback);
+      Serial.println("Notications for Light done!");
+    if(pTempChar_1->canNotify())
+      pTempChar_1->registerForNotify(notifyCallback);
+      Serial.println("Notications for Temp done!");*/
     connected = true;
+    Serial.println("Initialization Complete!");
+    return(true);
 }
 /**
  * Scan for BLE servers and find the first one that adverti
@@ -157,7 +180,9 @@ void setup() {
   pBLEScan->start(5, false);
 } // End of setup.
 
-
+std::string gValue;
+std::string lValue;
+std::string tValue;
 // This is the Arduino main loop function.
 void loop() {
 
@@ -176,19 +201,15 @@ void loop() {
   // If we are connected to a peer BLE Server, update the characteristic each time we are reached
   // with the current time since boot.
   if (connected) {
-    String gValue = "gValue";
-    String lValue = "lValue";
-    String tValue = "tValue";
-
-    Serial.println("We are about to write");
-    
-    // Set the characteristic's value to be the array of bytes that is actually a string.
-    pGryoChar_1->writeValue(gValue.c_str(), gValue.length());
-    Serial.println("Wrote new characteristic (Gyro) \"" + gValue + "\"");
-    pLightChar_1->writeValue(lValue.c_str(), lValue.length());
-    Serial.println("Wrote new characteristic (Light) \"" + lValue + "\"");
-    pTempChar_1->writeValue(tValue.c_str(), tValue.length());
-    Serial.println("Setting new characteristic (Temp) \"" + tValue + "\"");
+    if(newMail)
+    {
+          //Maybe add a buffer so that CDH can do this part when it feels like it
+        Serial.println("Getting Message");
+        std::string value = newRemoteChar->readValue();
+        Serial.print("Read: ");
+        Serial.println(value.c_str()); 
+        newMail = false;
+    }
     
   }
   
