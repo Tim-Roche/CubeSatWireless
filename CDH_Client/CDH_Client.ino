@@ -19,8 +19,6 @@ static        BLEUUID    LIGHT_CHAR_1("605b0001-0d8f-4002-abb3-3eb9a9c388ea");
 static BLEUUID TEMP_SERVICE_UUID("b58d0000-066d-4f45-99fa-60c588735e5d");
 static        BLEUUID    TEMP_CHAR_1("b58d0001-066d-4f45-99fa-60c588735e5d");
 
-
-
 static boolean doConnect = false;
 static boolean connected = false;
 static boolean doScan = false;
@@ -39,13 +37,14 @@ static void notifyCallback(
   uint8_t* pData,
   size_t length,
   bool isNotify) {
+      Serial.println("***********************");
     Serial.print("Notify callback for characteristic ");
     Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
     Serial.print(" of data length ");
     Serial.println(length);
     Serial.print("data: ");
     Serial.println((char*)pData);
-
+    Serial.println("\n");
     newRemoteChar = pBLERemoteCharacteristic;
     newMail = true;
 }
@@ -123,15 +122,16 @@ bool connectToServer() {
       pGryoChar_1->registerForNotify(notifyCallback);
       Serial.println("Notications for Gyro done!");
     }
-    /*if(pGryoChar_1->canNotify())
-      pGryoChar_1->registerForNotify(notifyCallback);
-      Serial.println("Notications for Gyro done!");
     if(pLightChar_1->canNotify())
+    {
       pLightChar_1->registerForNotify(notifyCallback);
       Serial.println("Notications for Light done!");
+    }
     if(pTempChar_1->canNotify())
+    {
       pTempChar_1->registerForNotify(notifyCallback);
-      Serial.println("Notications for Temp done!");*/
+      Serial.println("Notications for Temp done!");
+    }
     connected = true;
     Serial.println("Initialization Complete!");
     return(true);
@@ -203,12 +203,13 @@ void loop() {
   if (connected) {
     if(newMail)
     {
-          //Maybe add a buffer so that CDH can do this part when it feels like it
+        //Maybe add a buffer so that CDH can do this part when it feels like it
         Serial.println("Getting Message");
         std::string value = newRemoteChar->readValue();
         Serial.print("Read: ");
         Serial.println(value.c_str()); 
         newMail = false;
+        Serial.println("***********************");
     }
     
   }
