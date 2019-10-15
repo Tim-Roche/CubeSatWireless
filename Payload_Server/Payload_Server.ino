@@ -73,11 +73,17 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       }
       else if(uuid == LIGHT_CHAR_1)
       {
-         pCharacteristic->setValue(("Light!"+String(t*10)).c_str());
+        String message = "Light!"+String(t);
+         Serial.print("Transmitting: ");
+         Serial.println(message.c_str());
+         pCharacteristic->setValue(message.c_str());
       }
       else if(uuid == TEMP_CHAR_1)
       {
-         pCharacteristic->setValue(("Temp!"+String(t*1000)).c_str());
+        String message = "Temp!"+String(t);
+         Serial.print("Transmitting: ");
+         Serial.println(message.c_str());
+         pCharacteristic->setValue(message.c_str());
       }    
       else
       {
@@ -165,24 +171,24 @@ String tValue = "tValue";
 void loop() {
   if (deviceConnected) {
     t++;
-    if(t >= 100000)
+    if(t > 2)
       t = 0;
-    if(t%100 == 0)
+    if(t == 0)
     {
       Serial.println("Notifying Gyro");
       pGryoChar_1->notify();
     }
-    if(t%300 == 0)
+    if(t == 1)
     {
       Serial.println("Notifying Light");
       pLightChar_1->notify();
     }
-    if(t%500 == 0)
+    if(t == 2)
     {
       Serial.println("Notifying Temp");
       pTempChar_1->notify();
     }
-    delay(10);
+    delay(1000);
   }
   else
   {
