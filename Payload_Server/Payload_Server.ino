@@ -9,6 +9,9 @@
 #include <BLEServer.h>
 #include <BLE2902.h>
 
+#include "esp32-hal-log.h"
+
+
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
@@ -94,6 +97,10 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 
 void setup()
 {
+  Serial.setDebugOutput(true);
+
+  esp_log_level_set("*", ESP_LOG_VERBOSE);
+  
   pinMode (LED_B, OUTPUT);                                                // Set Builtin LED to output
   
   Serial.begin(115200);                                                         // Initialize serial port

@@ -216,13 +216,14 @@ void loop() {
         Serial.println(value.c_str()); 
         newMail = false;
         Serial.println("***********************");
+        Serial.print("t: ");
         Serial.print(t);
         if(t > 10) 
         {
               Serial.println("NOTIFY DISABLED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-              pGryoChar_1->registerForNotify(notifyCallback, false);
-              pLightChar_1->registerForNotify(notifyCallback, false);
-              pTempChar_1->registerForNotify(notifyCallback, false);
+              pGryoChar_1->registerForNotify(nullptr);
+              pLightChar_1->registerForNotify(nullptr);
+              pTempChar_1->registerForNotify(nullptr);
         }
     }
     
