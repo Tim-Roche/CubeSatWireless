@@ -69,14 +69,31 @@ bool connectToServer() {
     
     BLEClient*  pClient  = BLEDevice::createClient();
     Serial.println("Created client");
-
     pClient->setClientCallbacks(new MyClientCallback());
-
     pClient->connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
+    autoDiscover(pClient);
     Serial.println(" - Connected to server");
     
     Serial.println("Initialization Complete!");
     return(true);
+}
+
+void autoDiscover(BLEClient* pClient)
+{
+  Serial.println("Avaliable Services:");
+  std::map<std::string, BLERemoteService*>* services = pClient->getServices();
+  std::map<std::string, BLERemoteService*>::iterator itr;
+  for (itr = services->begin(); itr != services->end(); ++itr)
+  {
+    Serial.println((itr->first).c_str());
+    std::map<std::string, BLERemoteCharacteristic*>* character = (itr->second)->getCharacteristics();
+    std::map<std::string, BLERemoteCharacteristic*>::iterator charItr;
+    for (charItr = character->begin(); charItr != character->end(); ++charItr)
+    {
+      Serial.print("---");
+      Serial.println((charItr->first).c_str());
+    }
+  }
 }
 
 

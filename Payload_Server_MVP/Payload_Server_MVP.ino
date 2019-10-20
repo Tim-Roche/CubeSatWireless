@@ -14,6 +14,9 @@
 
 #define  TEST_SERVICE_UUID  "f9fd0000-71ae-42c4-bd19-9d5e37ebf073"
 #define  TEST_CHAR_1        "f9fd0001-71ae-42c4-bd19-9d5e37ebf073"
+
+#define  BEST_SERVICE_UUID  "f9fd0003-71ae-42c4-bd19-9d5e37ebf073"
+#define  BEST_CHAR_1        "f9fd0004-71ae-42c4-bd19-9d5e37ebf073"
 String payloadName = "MVPayload_1";
 
 //#define  TEST_SERVICE_UUID  "0f4d0000-540a-45ac-b68d-8df1872592e9"
@@ -22,6 +25,7 @@ String payloadName = "MVPayload_1";
 
 BLEServer *pServer = NULL;
 BLECharacteristic * pTestChar_1;
+BLECharacteristic * pBestChar_1;
 
 bool deviceConnected = false;
 
@@ -37,6 +41,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
     
     void onDisconnect(BLEServer* pServer) {
       Serial.println("I Disconnected!");
+      deviceConnected = false;
     }
 };
 
@@ -86,10 +91,19 @@ void setup()
 
   //Creating Services
   BLEService *pTestService = pServer->createService(TEST_SERVICE_UUID);                 // Create the service UUID from the server
-  
+  BLEService *pBestService = pServer->createService(BEST_SERVICE_UUID);                 // Create the service UUID from the server
+    
   //Creating Characteristics
   pTestChar_1 = pTestService->createCharacteristic(                                // Create the characteristic UUID for server
                                          TEST_CHAR_1,
+                                         BLECharacteristic::PROPERTY_READ  |
+                                         BLECharacteristic::PROPERTY_WRITE |
+                                         BLECharacteristic::PROPERTY_NOTIFY |
+                                         BLECharacteristic::PROPERTY_INDICATE
+                                       );
+
+  pBestChar_1 = pBestService->createCharacteristic(                                // Create the characteristic UUID for server
+                                         BEST_CHAR_1,
                                          BLECharacteristic::PROPERTY_READ  |
                                          BLECharacteristic::PROPERTY_WRITE |
                                          BLECharacteristic::PROPERTY_NOTIFY |
@@ -100,13 +114,20 @@ void setup()
 
   pTestChar_1->addDescriptor(new BLE2902());
 
+  pBestChar_1->setCallbacks(new MyCallbacks()); 
+
+  pBestChar_1->addDescriptor(new BLE2902());
+
   pTestService->start();                                                            // Start service
-                         
+
+  pBestService->start();   
+  
   pServer->setCallbacks(new MyServerCallbacks());                               // Set server callbacks
   
   //Advertising
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();                   // Grab advertisiing service
   pAdvertising->addServiceUUID(TEST_SERVICE_UUID);   
+  pAdvertising->addServiceUUID(BEST_SERVICE_UUID);  
   pAdvertising->setScanResponse(true);                                          
   pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
