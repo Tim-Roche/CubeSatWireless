@@ -5,24 +5,26 @@
 */
 
 #include <BLEDevice.h>
-#include <BLEUtils.h>
+//#include <BLEUtils.h>
 #include <BLEServer.h>
 #include <BLE2902.h>
-
-#include "esp32-hal-log.h"
-
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
 #define  TEST_SERVICE_UUID  "f9fd0000-71ae-42c4-bd19-9d5e37ebf073"
 #define  TEST_CHAR_1        "f9fd0001-71ae-42c4-bd19-9d5e37ebf073"
+String payloadName = "MVPayload_1";
+
+//#define  TEST_SERVICE_UUID  "0f4d0000-540a-45ac-b68d-8df1872592e9"
+//#define  TEST_CHAR_1        "0f4d0001-540a-45ac-b68d-8df1872592e9"
+//String payloadName = "MVPayload_2";
 
 BLEServer *pServer = NULL;
-BLECharacteristic * pTESTChar_1;
+BLECharacteristic * pTestChar_1;
 
 bool deviceConnected = false;
-/********** Server Callback to restart advertising after a subsystem conencts **********/
+
 class MyServerCallbacks: public BLEServerCallbacks {
   // TODO this doesn't take into account several clients being connected
     
@@ -30,8 +32,11 @@ class MyServerCallbacks: public BLEServerCallbacks {
       BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
       pAdvertising->start();
       deviceConnected = true;
+      Serial.println("I connected!");
     };
+    
     void onDisconnect(BLEServer* pServer) {
+      Serial.println("I Disconnected!");
     }
 };
 
@@ -59,7 +64,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       Serial.println(uuid.c_str());
       if(uuid == TEST_CHAR_1)
       {
-         String message = "Test!"+String(t);
+         String message = "Test!";
          Serial.print("Transmitting: ");
          Serial.println(message.c_str());
          pCharacteristic->setValue(message.c_str());
@@ -76,14 +81,14 @@ void setup()
   Serial.begin(115200);                                                         // Initialize serial port
   Serial.println("Starting BLE work!");
 
-  BLEDevice::init("C&DH");                                                      // Initialize the BLE device
+  BLEDevice::init(payloadName.c_str());                                                      // Initialize the BLE device
   BLEServer *pServer = BLEDevice::createServer();                               // Save the BLE device server
 
   //Creating Services
-  BLEService *pGyroService = pServer->createService(TEST_SERVICE_UUID);                 // Create the service UUID from the server
+  BLEService *pTestService = pServer->createService(TEST_SERVICE_UUID);                 // Create the service UUID from the server
   
   //Creating Characteristics
-  pGryoChar_1 = pGyroService->createCharacteristic(                                // Create the characteristic UUID for server
+  pTestChar_1 = pTestService->createCharacteristic(                                // Create the characteristic UUID for server
                                          TEST_CHAR_1,
                                          BLECharacteristic::PROPERTY_READ  |
                                          BLECharacteristic::PROPERTY_WRITE |
@@ -91,7 +96,7 @@ void setup()
                                          BLECharacteristic::PROPERTY_INDICATE
                                        );
   
-  pGryoChar_1->setCallbacks(new MyCallbacks()); 
+  pTestChar_1->setCallbacks(new MyCallbacks()); 
 
   pTestChar_1->addDescriptor(new BLE2902());
 
@@ -101,34 +106,22 @@ void setup()
   
   //Advertising
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();                   // Grab advertisiing service
-  
   pAdvertising->addServiceUUID(TEST_SERVICE_UUID);   
-  
   pAdvertising->setScanResponse(true);                                          
   pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();                                                // Start advertising
   Serial.println("Setup Complete. We are Advertising!");
-
-
 }
 
 void loop() {
   if (deviceConnected) {
-    Serial.println("Payload 2 Connected!");
-    t++;
-    if(t >= 10)
-    {
-      Serial.println("Notifying Test");
-      pTestChar_1->notify();
-      t = 0;
-    }
-    delay(1000);
+     Serial.println("Wow, I am connected!");
   }
   else
   {
-     Serial.println("Device is not Connected");
-     delay(100);
+     Serial.print(BLEDevice::getAddress().toString().c_str());
+     Serial.println(" Device is not Connected");
   }
-  
+  delay(1000);
 }

@@ -6,32 +6,28 @@
  */
 
 #include "BLEDevice.h"
-//#include "BLEScan.h"
 
-// Setting up Services/Chars
-static BLEUUID GYRO_SERVICE_UUID("f9fd0000-71ae-42c4-bd19-9d5e37ebf073");
-static        BLEUUID GYRO_CHAR_1("f9fd0001-71ae-42c4-bd19-9d5e37ebf073");
-
-static BLEUUID LIGHT_SERVICE_UUID("605b0000-0d8f-4002-abb3-3eb9a9c388ea");
-static        BLEUUID    LIGHT_CHAR_1("605b0001-0d8f-4002-abb3-3eb9a9c388ea");
-
-static BLEUUID TEMP_SERVICE_UUID("b58d0000-066d-4f45-99fa-60c588735e5d");
-static        BLEUUID    TEMP_CHAR_1("b58d0001-066d-4f45-99fa-60c588735e5d");
-
-static BLEUUID    DESCRIPT("2902");
-
-static boolean doConnect = false;
-static boolean connected = false;
-static boolean doScan = false;
+//Device Configuration
+static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
+static BLEAddress deviceAddr2 = BLEAddress("FF:FF:3D:1A:C2:66");
 
 static BLERemoteCharacteristic* pGryoChar_1;
-static BLERemoteCharacteristic* pLightChar_1;
-static BLERemoteCharacteristic* pTempChar_1;
-
 static BLEAdvertisedDevice* myDevice;
 
+//Globals
+static boolean doConnect = false;
+
+//Scanning Related
+static unsigned long ms;
+static unsigned long lastEvent = 0;
+static unsigned long threshold = 10000;
+boolean scanning = true;
+
 boolean newMail = false;
+
 BLERemoteCharacteristic* newRemoteChar;
+
+int numConnected = 0;
 
 static void notifyCallback(
   BLERemoteCharacteristic* pBLERemoteCharacteristic,
@@ -52,187 +48,88 @@ static void notifyCallback(
 
 class MyClientCallback : public BLEClientCallbacks {
   void onConnect(BLEClient* pclient) {
+        Serial.printf("device connected: %s\n", pclient->getPeerAddress().toString().c_str());
+        numConnected++;
+        Serial.print("Devices Connected: ");
+        Serial.println(numConnected);
   }
 
   void onDisconnect(BLEClient* pclient) {
-    connected = false;
+    Serial.printf("device disconnected: %s\n", pclient->getPeerAddress().toString().c_str());
     Serial.println("onDisconnect");
+    numConnected--;
+    Serial.print("Devices Connected: ");
+    Serial.println(numConnected);
   }
 };
 
 bool connectToServer() {
-    Serial.println("connectToServer()");
     Serial.print("Forming a connection to ");
     Serial.println(myDevice->getAddress().toString().c_str());
     
     BLEClient*  pClient  = BLEDevice::createClient();
-    Serial.println(" - Created client");
+    Serial.println("Created client");
 
     pClient->setClientCallbacks(new MyClientCallback());
 
-    // Connect to the remove BLE Server.
     pClient->connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
     Serial.println(" - Connected to server");
     
-    // Connect to Services
-    BLERemoteService* pGyroService = pClient->getService(GYRO_SERVICE_UUID);
-    BLERemoteService* pLightService = pClient->getService(LIGHT_SERVICE_UUID);
-    BLERemoteService* pTempService = pClient->getService(TEMP_SERVICE_UUID);
-    Serial.println("Services are up!");
-    if (pGyroService == nullptr) {
-      Serial.print("Failed to find Service: Gyro");
-      pClient->disconnect();
-      return false;
-    }
-    if (pLightService == nullptr) {
-      Serial.print("Failed to find Service: Light");
-      pClient->disconnect();
-      return false;
-    }
-    if (pTempService == nullptr) {
-      Serial.print("Failed to find Service: Temp");
-      pClient->disconnect();
-      return false;
-    }
-
-    pGryoChar_1 = pGyroService->getCharacteristic(GYRO_CHAR_1);
-    pLightChar_1 = pLightService->getCharacteristic(LIGHT_CHAR_1);
-    pTempChar_1 = pTempService->getCharacteristic(TEMP_CHAR_1);
-    
-    if (pGryoChar_1 == nullptr) {
-      Serial.print("Failed to find Char: Gyro ");
-      pClient->disconnect();
-      return false;
-    }
-    if (pLightChar_1 == nullptr) {
-      Serial.print("Failed to find Char: Light");
-      pClient->disconnect();
-      return false;
-    }
-    if (pTempChar_1 == nullptr) {
-      Serial.print("Failed to find Char: Temp");
-      pClient->disconnect();
-      return false;
-    }
-    
-    Serial.println("Found our services");
-    Serial.println(pGryoChar_1->canNotify());
-    if(pGryoChar_1->canNotify())
-    {
-      Serial.println("Next Line...");
-      pGryoChar_1->registerForNotify(notifyCallback);
-      Serial.println("Notications for Gyro done!");
-    }
-    if(pLightChar_1->canNotify())
-    {
-      pLightChar_1->registerForNotify(notifyCallback);
-      Serial.println("Notications for Light done!");
-    }
-    if(pTempChar_1->canNotify())
-    {
-      pTempChar_1->registerForNotify(notifyCallback);
-      Serial.println("Notications for Temp done!");
-    }
-
-
-    
-    connected = true;
     Serial.println("Initialization Complete!");
     return(true);
 }
-/**
- * Scan for BLE servers and find the first one that adverti
- * ses the service we are looking for.
- */
+
+
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
- /**
-   * Called for each advertising BLE server.
-   */
   void onResult(BLEAdvertisedDevice advertisedDevice) {
-    Serial.print("BLE Advertised Device found: ");
+    Serial.print("* ");
+    Serial.print(advertisedDevice.getAddress().toString().c_str());
+    Serial.print("  ");
     Serial.println(advertisedDevice.toString().c_str());
+   
 
     // We have found a device, let us now see if it contains the service we are looking for.
-    if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(GYRO_SERVICE_UUID)) {
-      Serial.println("Have a match!");
-      BLEDevice::getScan()->stop();
-      Serial.println("myDevice pointer made");
+    if (advertisedDevice.getAddress().equals(deviceAddr1) || advertisedDevice.getAddress().equals(deviceAddr2))
+    {
+      Serial.printf("!! Match with %s \n", advertisedDevice.getAddress().toString().c_str());
+      //BLEDevice::getScan()->stop();
       myDevice = new BLEAdvertisedDevice(advertisedDevice);
-
-      Serial.println("We are out!");
       doConnect = true;
-      doScan = true;
-
-    } // Found our server
-  } // onResult
-}; // MyAdvertisedDeviceCallbacks
-
+      scanning = true;
+    } 
+  } 
+}; 
 
 void setup() {
   Serial.begin(115200);
   Serial.println("Starting Arduino BLE Client application...");
   BLEDevice::init("");
-
-  // Retrieve a Scanner and set the callback we want to use to be informed when we
-  // have detected a new device.  Specify that we want active scanning and start the
-  // scan to run for 5 seconds.
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setInterval(1349);
   pBLEScan->setWindow(449);
   pBLEScan->setActiveScan(true);
   pBLEScan->start(5, false);
-} // End of setup.
+} 
 
-std::string gValue;
-std::string lValue;
-std::string tValue;
-int t = 0;
-// This is the Arduino main loop function.
+
 void loop() {
-
-  // If the flag "doConnect" is true then we have scanned for and found the desired
-  // BLE Server with which we wish to connect.  Now we connect to it.  Once we are 
-  // connected we set the connected flag to be true.
   if (doConnect == true) {
-    if (connectToServer()) {
-      Serial.println("We are now connected to the BLE Server.");
-    } else {
-      Serial.println("We have failed to connect to the server; there is nothin more we will do.");
-    }
+    connectToServer();
     doConnect = false;
   }
-
-  // If we are connected to a peer BLE Server, update the characteristic each time we are reached
-  // with the current time since boot.
-  if (connected) {
-    if(newMail)
-    {
-        t++;
-        //Maybe add a buffer so that CDH can do this part when it feels like it
-        Serial.println("Getting Message");
-        std::string value = newRemoteChar->readValue();
-        Serial.print("Read: ");
-        Serial.println(value.c_str()); 
-        newMail = false;
-        Serial.println("***********************");
-        Serial.print("t: ");
-        Serial.print(t);
-        if(t > 10) 
-        {
-              Serial.println("NOTIFY DISABLED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-              pGryoChar_1->registerForNotify(nullptr);
-              pLightChar_1->registerForNotify(nullptr);
-              pTempChar_1->registerForNotify(nullptr);
-        }
-    }
-    
+  
+  ms = millis();
+  if ((scanning) && (ms >= lastEvent + threshold)) {
+    BLEDevice::getScan()->stop();
+    scanning = false;
+    Serial.println("Scanning Complete!");
   }
   
-  else if(doScan)
-  {
-    BLEDevice::getScan()->start(0);  // this is just eample to start scan after disconnect, most likely there is better way to do it in arduino
+  if (numConnected != 0) {
+    Serial.println("There is a device connected");
   }
+
   
   delay(1000); // Delay a second between loops.
 }
