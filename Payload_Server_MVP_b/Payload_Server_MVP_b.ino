@@ -116,7 +116,7 @@ void setup()
 
   //pBestChar_1->setCallbacks(new MyCallbacks()); 
 
-  pBestChar_1->addDescriptor(new BLE2902());
+  //pBestChar_1->addDescriptor(new BLE2902());
 
   pTestService->start();                                                            // Start service
 
@@ -151,5 +151,5 @@ void loop() {
      Serial.print(BLEDevice::getAddress().toString().c_str());
      Serial.println(" Device is not Connected");
   }
-  delay(1000);
+  delay(5000);
 }
