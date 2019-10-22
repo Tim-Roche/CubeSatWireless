@@ -6,13 +6,13 @@
  */
 
 #include "BLEDevice.h"
+#include <stack>
 
 //Device Configuration
 static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
-static BLEAddress deviceAddr2 = BLEAddress("FF:FF:3D:1A:C2:66");
+static BLEAddress deviceAddr2 = BLEAddress("cc:50:e3:a8:40:fe");
 
 static BLERemoteCharacteristic* pGryoChar_1;
-static BLEAdvertisedDevice* myDevice;
 
 //Globals
 static boolean doConnect = false;
@@ -27,6 +27,8 @@ boolean scanning = true;
 //Characteristic Map
 byte REGNOTIF = 0x01;
 std::map<std::string,byte> charMap; //Current handles notification registration
+std::stack <BLEAdvertisedDevice*> connectionWaitlist; 
+
 
 boolean newMail = false;
 
@@ -68,7 +70,7 @@ class MyClientCallback : public BLEClientCallbacks {
   }
 };
 
-bool connectToServer() {
+bool connectToServer(BLEAdvertisedDevice* myDevice) {
     Serial.print("Forming a connection to ");
     Serial.println(myDevice->getAddress().toString().c_str());
     
@@ -131,8 +133,9 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
     {
       Serial.printf("!! Match with %s \n", advertisedDevice.getAddress().toString().c_str());
       //BLEDevice::getScan()->stop();
-      myDevice = new BLEAdvertisedDevice(advertisedDevice);
-      doConnect = true;
+      BLEAdvertisedDevice* newDevice = new BLEAdvertisedDevice(advertisedDevice);
+      connectionWaitlist.push(newDevice);
+      Serial.println("Pushing to stack!");
       scanning = true;
     } 
   } 
@@ -159,9 +162,11 @@ void setup()
 
 
 void loop() {
-  if (doConnect == true) {
-    connectToServer();
-    doConnect = false;
+  if (connectionWaitlist.size() != 0) {
+    Serial.print("Remaining on Stack:");
+    Serial.println(connectionWaitlist.size());
+    connectToServer(connectionWaitlist.top());
+    connectionWaitlist.pop();
   }
   
   ms = millis();
