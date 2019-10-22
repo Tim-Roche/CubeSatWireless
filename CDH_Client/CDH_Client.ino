@@ -28,7 +28,7 @@ boolean scanning = true;
 byte REGNOTIF = 0x01;
 std::map<std::string,byte> charMap; //Current handles notification registration
 std::stack <BLEAdvertisedDevice*> connectionWaitlist; 
-
+std::stack <BLERemoteCharacteristic*> messageReadWaitlist; 
 
 boolean newMail = false;
 
@@ -37,10 +37,8 @@ BLERemoteCharacteristic* newRemoteChar;
 int numConnected = 0;
 
 static void notifyCallback(
-  BLERemoteCharacteristic* pBLERemoteCharacteristic,
-  uint8_t* pData,
-  size_t length,
-  bool isNotify) {
+  BLERemoteCharacteristic* pBLERemoteCharacteristic,uint8_t* pData,size_t length,bool isNotify) 
+  {
     Serial.println("***********************");
     Serial.print("Notify callback for characteristic ");
     Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
@@ -49,7 +47,7 @@ static void notifyCallback(
     Serial.print("data: ");
     Serial.println((char*)pData);
     Serial.println("\n");
-    newRemoteChar = pBLERemoteCharacteristic;
+    messageReadWaitlist.push(pBLERemoteCharacteristic);
     newMail = true;
 }
 
@@ -65,6 +63,7 @@ class MyClientCallback : public BLEClientCallbacks {
     Serial.printf("device disconnected: %s\n", pclient->getPeerAddress().toString().c_str());
     Serial.println("onDisconnect");
     numConnected--;
+    lastEvent = millis(); //Start the search for the disconnected module
     Serial.print("Devices Connected: ");
     Serial.println(numConnected);
   }
@@ -150,6 +149,7 @@ void setup()
   //Eventually there will be a way for user to enter what they want charecteristics they want to register for
   //For now its hard coded. Deal with it.
   charMap.insert(std::pair<std::string,byte>("f9fd0001-71ae-42c4-bd19-9d5e37ebf073",REGNOTIF));
+  charMap.insert(std::pair<std::string,byte>("f9fd0004-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   
   BLEDevice::init("");
   BLEScan* pBLEScan = BLEDevice::getScan();
@@ -160,6 +160,19 @@ void setup()
   pBLEScan->start(5, false);
 } 
 
+void checkInbox()
+{
+  if(messageReadWaitlist.size() != 0)
+  {
+    Serial.print("New Message in Inbox! Messages Unread: ");
+    Serial.println(messageReadWaitlist.size());
+    BLERemoteCharacteristic* newValue = messageReadWaitlist.top();
+    Serial.println("I am reading the value now!");
+    std::string valueString = newValue->readValue();
+    Serial.println(valueString.c_str());
+    messageReadWaitlist.pop();
+  }
+}
 
 void loop() {
   if (connectionWaitlist.size() != 0) {
@@ -175,9 +188,17 @@ void loop() {
     scanning = false;
     Serial.println("Scanning Complete!");
   }
-  
-  if (numConnected != 0) {
+
+  Serial.print("numConnected: ");
+  Serial.println(numConnected);
+  if (numConnected > 0) {
     Serial.println("There is a device connected");
+    checkInbox();
+  }
+  else
+  {
+    Serial.println("0 are connected right now!");
+    numConnected = 0;
   }
 
   
