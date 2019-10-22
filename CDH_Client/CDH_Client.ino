@@ -12,12 +12,13 @@
 static BLEUUID GYRO_SERVICE_UUID("f9fd0000-71ae-42c4-bd19-9d5e37ebf073");
 static        BLEUUID GYRO_CHAR_1("f9fd0001-71ae-42c4-bd19-9d5e37ebf073");
 
-
 static BLEUUID LIGHT_SERVICE_UUID("605b0000-0d8f-4002-abb3-3eb9a9c388ea");
 static        BLEUUID    LIGHT_CHAR_1("605b0001-0d8f-4002-abb3-3eb9a9c388ea");
 
 static BLEUUID TEMP_SERVICE_UUID("b58d0000-066d-4f45-99fa-60c588735e5d");
 static        BLEUUID    TEMP_CHAR_1("b58d0001-066d-4f45-99fa-60c588735e5d");
+
+static BLEUUID    DESCRIPT("2902");
 
 static boolean doConnect = false;
 static boolean connected = false;
@@ -37,7 +38,7 @@ static void notifyCallback(
   uint8_t* pData,
   size_t length,
   bool isNotify) {
-      Serial.println("***********************");
+    Serial.println("***********************");
     Serial.print("Notify callback for characteristic ");
     Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
     Serial.print(" of data length ");
@@ -132,6 +133,9 @@ bool connectToServer() {
       pTempChar_1->registerForNotify(notifyCallback);
       Serial.println("Notications for Temp done!");
     }
+
+
+    
     connected = true;
     Serial.println("Initialization Complete!");
     return(true);
@@ -183,6 +187,7 @@ void setup() {
 std::string gValue;
 std::string lValue;
 std::string tValue;
+int t = 0;
 // This is the Arduino main loop function.
 void loop() {
 
@@ -203,6 +208,7 @@ void loop() {
   if (connected) {
     if(newMail)
     {
+        t++;
         //Maybe add a buffer so that CDH can do this part when it feels like it
         Serial.println("Getting Message");
         std::string value = newRemoteChar->readValue();
@@ -210,6 +216,15 @@ void loop() {
         Serial.println(value.c_str()); 
         newMail = false;
         Serial.println("***********************");
+        Serial.print("t: ");
+        Serial.print(t);
+        if(t > 10) 
+        {
+              Serial.println("NOTIFY DISABLED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+              pGryoChar_1->registerForNotify(nullptr);
+              pLightChar_1->registerForNotify(nullptr);
+              pTempChar_1->registerForNotify(nullptr);
+        }
     }
     
   }
