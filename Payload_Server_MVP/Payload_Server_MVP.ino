@@ -135,9 +135,16 @@ void setup()
   Serial.println("Setup Complete. We are Advertising!");
 }
 
+void sendNotify(BLECharacteristic* chr)
+{
+  chr->notify();
+}
+
 void loop() {
   if (deviceConnected) {
      Serial.println("Wow, I am connected!");
+     Serial.println("Sending Notification!");
+     sendNotify(pTestChar_1);
   }
   else
   {
