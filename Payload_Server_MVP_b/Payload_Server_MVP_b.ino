@@ -14,18 +14,12 @@
 
 #define  TEST_SERVICE_UUID  "f9fd0000-71ae-42c4-bd19-9d5e37ebf073"
 #define  TEST_CHAR_1        "f9fd0001-71ae-42c4-bd19-9d5e37ebf073"
+String payloadName = "MVPayload_Test";
 
-#define  BEST_SERVICE_UUID  "f9fd0003-71ae-42c4-bd19-9d5e37ebf073"
-#define  BEST_CHAR_1        "f9fd0004-71ae-42c4-bd19-9d5e37ebf073"
-String payloadName = "MVPayload_1";
 
-//#define  TEST_SERVICE_UUID  "0f4d0000-540a-45ac-b68d-8df1872592e9"
-//#define  TEST_CHAR_1        "0f4d0001-540a-45ac-b68d-8df1872592e9"
-//String payloadName = "MVPayload_2";
 
 BLEServer *pServer = NULL;
 BLECharacteristic * pTestChar_1;
-//BLECharacteristic * pBestChar_1;
 
 bool deviceConnected = false;
 
