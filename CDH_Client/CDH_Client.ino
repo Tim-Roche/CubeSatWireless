@@ -11,6 +11,8 @@
 //Device Configuration
 static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
 static BLEAddress deviceAddr2 = BLEAddress("cc:50:e3:a8:40:fe");
+static BLEAddress deviceAddr3 = BLEAddress("a4:cf:12:1e:48:fa");
+static BLEAddress deviceAddr4 = BLEAddress("3c:71:bf:71:00:36");
 
 static BLERemoteCharacteristic* pGryoChar_1;
 
@@ -128,7 +130,7 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
    
 
     // We have found a device, let us now see if it contains the service we are looking for.
-    if (advertisedDevice.getAddress().equals(deviceAddr1) || advertisedDevice.getAddress().equals(deviceAddr2))
+    if (advertisedDevice.getAddress().equals(deviceAddr1) || advertisedDevice.getAddress().equals(deviceAddr2) ||  advertisedDevice.getAddress().equals(deviceAddr3) ||  advertisedDevice.getAddress().equals(deviceAddr4)) //Make this not hard coded
     {
       Serial.printf("!! Match with %s \n", advertisedDevice.getAddress().toString().c_str());
       //BLEDevice::getScan()->stop();
@@ -151,6 +153,7 @@ void setup()
   charMap.insert(std::pair<std::string,byte>("f9fd0004-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0001-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0006-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
+  charMap.insert(std::pair<std::string,byte>("f9fd0008-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   
   BLEDevice::init("");
   BLEScan* pBLEScan = BLEDevice::getScan();
