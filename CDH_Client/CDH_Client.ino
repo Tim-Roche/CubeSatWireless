@@ -148,8 +148,8 @@ void setup()
   //User Charecteristic Registration Requirements
   //Eventually there will be a way for user to enter what they want charecteristics they want to register for
   //For now its hard coded. Deal with it.
-  charMap.insert(std::pair<std::string,byte>("f9fd0001-71ae-42c4-bd19-9d5e37ebf073",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0004-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
+  charMap.insert(std::pair<std::string,byte>("f9fd0001-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   
   BLEDevice::init("");
   BLEScan* pBLEScan = BLEDevice::getScan();
