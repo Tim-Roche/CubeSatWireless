@@ -14,7 +14,7 @@
 
 
 
-String payloadName = "MVPayload_CHEST";
+String payloadName = "MVPayload_NEST";
 
 #define  NEST_SERVICE_UUID  "f9fd0007-71ae-42c4-bd19-9d5e37ebf073"
 #define  NEST_CHAR_1        "f9fd0008-71ae-42c4-bd19-9d5e37ebf073"
