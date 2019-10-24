@@ -36,11 +36,11 @@ class MyServerCallbacks: public BLEServerCallbacks {
       BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
       pAdvertising->start();
       deviceConnected = true;
-      Serial.println("I connected!");
+      Serial.println("Connection Initiated");
     };
     
     void onDisconnect(BLEServer* pServer) {
-      Serial.println("I Disconnected!");
+      Serial.println("Connection Ended");
       deviceConnected = false;
     }
 };
@@ -65,18 +65,18 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 
     void onRead(BLECharacteristic* pCharacteristic) {
       String uuid = pCharacteristic->getUUID().toString().c_str();
-      Serial.print("Someone wants to read my data: ");
+      Serial.print("Another device is accessing data: ");
       Serial.println(uuid.c_str());
       if(uuid == BEST_CHAR_1)
       {
-         String message = "Test!";
+         String message = "Best!";
          Serial.print("Transmitting: ");
          Serial.println(message.c_str());
          pCharacteristic->setValue(message.c_str());
       }
       else
       {
-        Serial.println("Unknown UUID!");  
+        Serial.println("Unknown UUID");  
       }
    }
 };
@@ -84,7 +84,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 void setup()
 {
   Serial.begin(115200);                                                         // Initialize serial port
-  Serial.println("Starting BLE work!");
+  Serial.println("Starting BLE");
 
   BLEDevice::init(payloadName.c_str());                                                      // Initialize the BLE device
   BLEServer *pServer = BLEDevice::createServer();                               // Save the BLE device server
@@ -132,7 +132,8 @@ void setup()
   pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();                                                // Start advertising
-  Serial.println("Setup Complete. We are Advertising!");
+  Serial.println("Setup Complete");
+  Serial.println("Now Advertising");
 }
 
 void sendNotify(BLECharacteristic* chr)
@@ -142,14 +143,14 @@ void sendNotify(BLECharacteristic* chr)
 
 void loop() {
   if (deviceConnected) {
-     Serial.println("Wow, I am connected!");
-     Serial.println("Sending Notification!");
+     Serial.println("Connected");
+     Serial.println("Sending Notification");
      sendNotify(pBestChar_1);
   }
   else
   {
      Serial.print(BLEDevice::getAddress().toString().c_str());
-     Serial.println(" Device is not Connected");
+     Serial.println(" Device Not Connected");
   }
   delay(5000);
 }
