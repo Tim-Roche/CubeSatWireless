@@ -22,9 +22,10 @@ static boolean doConnect = false;
 //Scanning Related
 static unsigned long ms;
 static unsigned long lastEvent = 0;
-static unsigned long threshold = 10000;
+static unsigned long threshold = 60000;
 boolean scanning = true;
 
+int TESTPIN = 4;
 
 //Characteristic Map
 byte REGNOTIF = 0x01;
@@ -142,11 +143,17 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
   } 
 }; 
 
+void initLatency()
+{
+  pinMode(TESTPIN, OUTPUT);
+  digitalWrite(TESTPIN, LOW);
+}
+
 void setup() 
 {  
   Serial.begin(115200);
   Serial.println("Starting Arduino BLE Client application...");
-
+  initLatency();
   //User Charecteristic Registration Requirements
   //Eventually there will be a way for user to enter what they want charecteristics they want to register for
   //For now its hard coded. Deal with it.
@@ -164,6 +171,11 @@ void setup()
   pBLEScan->start(5, false);
 } 
 
+void debugLED()
+{
+  digitalWrite(TESTPIN, HIGH);
+}
+
 void checkInbox()
 {
   if(messageReadWaitlist.size() != 0)
@@ -175,6 +187,7 @@ void checkInbox()
     std::string valueString = newValue->readValue();
     Serial.println(valueString.c_str());
     messageReadWaitlist.pop();
+    debugLED();
   }
 }
 
@@ -191,6 +204,7 @@ void loop() {
     BLEDevice::getScan()->stop();
     scanning = false;
     Serial.println("Scanning Complete!");
+    Serial.println("!!!!!!!!!!!!!!!!!!!!!!!!");
   }
 
   Serial.print("numConnected: ");
@@ -198,6 +212,7 @@ void loop() {
   if (numConnected > 0) {
     Serial.println("There is a device connected");
     checkInbox();
+    
   }
   else
   {
