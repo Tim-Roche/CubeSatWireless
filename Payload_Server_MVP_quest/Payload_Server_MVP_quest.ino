@@ -14,8 +14,27 @@
 
 #define  TEST_SERVICE_UUID  "f9fd0000-71ae-42c4-bd19-9d5e37ebf073"
 #define  TEST_CHAR_1        "f9fd0001-71ae-42c4-bd19-9d5e37ebf073"
-String payloadName = "MVPayload_Test";
+BLEUUID BLETST = BLEUUID(TEST_CHAR_1);
 
+String payloadName = "MVPayload_Quest";
+
+///// PICTURE BIT MAP //////////////
+const int iLen_int = 100;
+uint8_t image[iLen_int] = {255,  34,  94, 212, 43, 89, 10,   0,   9,   1,
+                           100,  43, 102,  50, 31, 45, 98, 200, 250, 193,
+                           255,  34,  94, 212, 43, 89, 10,   0,   9,   1,
+                           100,  43, 102,  50, 31, 45, 98, 200, 250, 193,
+                           255,  34,  94, 212, 43, 89, 10,   0,   9,   1,
+                           100,  43, 102,  50, 31, 45, 98, 200, 250, 193,
+                           255,  34,  94, 212, 43, 89, 10,   0,   9,   1,
+                           100,  43, 102,  50, 31, 45, 98, 200, 250, 193,
+                           255,  34,  94, 212, 43, 89, 10,   0,   9,   1,
+                           100,  43, 102,  50, 31, 45, 98, 200, 250, 193};
+
+uint8_t *image_p = image; //Sets pointer to firs
+size_t iLen = 100;t element in array
+
+///////////////////////////////////
 
 BLEServer *pServer = NULL;
 BLECharacteristic * pTestChar_1;
@@ -58,18 +77,12 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 
     void onRead(BLECharacteristic* pCharacteristic) {
       BLEUUID hit = pCharacteristic->getUUID();
-      //std::string uuid = pCharacteristic->getUUID().toString();
-      //Serial.println(TEST_CHAR_1.c_str());
-      BLEUUID BLETST = BLEUUID(TEST_CHAR_1);
       Serial.print("Someone wants to read my data: ");
-      //Serial.println(uuid.c_str());
-      //if(uuid == TEST_CHAR_1)
+
       if(hit.equals(BLETST))
       {
-         String message = "Test!";
-         Serial.print("Transmitting: ");
-         Serial.println(message.c_str());
-         pCharacteristic->setValue(message.c_str());
+         Serial.print("Transmitting Image: ");   
+         pCharacteristic->setValue(image_p, iLen);
       }
       else
       {

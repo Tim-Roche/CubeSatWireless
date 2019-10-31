@@ -29,6 +29,7 @@ int TESTPIN = 4;
 
 //Characteristic Map
 byte REGNOTIF = 0x01;
+
 std::map<std::string,byte> charMap; //Current handles notification registration
 std::stack <BLEAdvertisedDevice*> connectionWaitlist; 
 std::stack <BLERemoteCharacteristic*> messageReadWaitlist; 
@@ -161,6 +162,7 @@ void setup()
   charMap.insert(std::pair<std::string,byte>("f9fd0001-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0006-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0008-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
+  charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314",REGNOTIF));
   
   BLEDevice::init("");
   BLEScan* pBLEScan = BLEDevice::getScan();
@@ -176,6 +178,23 @@ void debugLED()
   digitalWrite(TESTPIN, HIGH);
 }
 
+void printStringAsBytes(std::string value)
+{
+  Serial.println(value.c_str());
+  int len = value.length();
+  Serial.print("The len is: ");
+  Serial.println(len);
+
+  for(int i = 0; i < len; i++)
+  {
+    Serial.print((uint8_t)value[i]);
+    if(i+1 != len)
+    {
+      Serial.print(",");
+    }
+  }
+}
+
 void checkInbox()
 {
   if(messageReadWaitlist.size() != 0)
@@ -183,9 +202,12 @@ void checkInbox()
     Serial.print("New Message in Inbox! Messages Unread: ");
     Serial.println(messageReadWaitlist.size());
     BLERemoteCharacteristic* newValue = messageReadWaitlist.top();
-    Serial.println("I am reading the value now!");
+
     std::string valueString = newValue->readValue();
     Serial.println(valueString.c_str());
+    
+    printStringAsBytes(valueString);
+    
     messageReadWaitlist.pop();
     debugLED();
   }
