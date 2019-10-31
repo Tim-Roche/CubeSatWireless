@@ -12,13 +12,12 @@
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#define  TEST_SERVICE_UUID  "f9fd0000-71ae-42c4-bd19-9d5e37ebf073"
-#define  TEST_CHAR_1        "f9fd0001-71ae-42c4-bd19-9d5e37ebf073"
-BLEUUID BLETST = BLEUUID(TEST_CHAR_1);
-
+std::string   TEST_SERVICE_UUID =  "24c2317b-e845-4cbc-bb4c-fbb93e51f72e";
+std::string  TEST_CHAR_1        =  "770294ed-f345-4f8b-bf3e-063b52d314ab";
 String payloadName = "MVPayload_Quest";
 
 ///// PICTURE BIT MAP //////////////
+size_t iLen = 100;
 const int iLen_int = 100;
 uint8_t image[iLen_int] = {255,  34,  94, 212, 43, 89, 10,   0,   9,   1,
                            100,  43, 102,  50, 31, 45, 98, 200, 250, 193,
@@ -31,8 +30,7 @@ uint8_t image[iLen_int] = {255,  34,  94, 212, 43, 89, 10,   0,   9,   1,
                            255,  34,  94, 212, 43, 89, 10,   0,   9,   1,
                            100,  43, 102,  50, 31, 45, 98, 200, 250, 193};
 
-uint8_t *image_p = image; //Sets pointer to firs
-size_t iLen = 100;t element in array
+uint8_t *image_p = image; //Sets pointer to first element in array
 
 ///////////////////////////////////
 
@@ -76,12 +74,17 @@ class MyCallbacks: public BLECharacteristicCallbacks {
     }
 
     void onRead(BLECharacteristic* pCharacteristic) {
-      BLEUUID hit = pCharacteristic->getUUID();
+      std::string uuid = pCharacteristic->getUUID().toString();
       Serial.print("Someone wants to read my data: ");
-
-      if(hit.equals(BLETST))
+      Serial.print(uuid.c_str());
+      Serial.print(" = ");
+      Serial.println(TEST_CHAR_1.c_str());
+      if(uuid == TEST_CHAR_1)
       {
-         Serial.print("Transmitting Image: ");   
+         //String message = "Test!";
+         Serial.print("Transmitting Image: ");
+         //Serial.println(message.c_str());
+         
          pCharacteristic->setValue(image_p, iLen);
       }
       else
