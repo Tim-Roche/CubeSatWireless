@@ -1,4 +1,4 @@
-/*
+ /*
     Based on Neil Kolban example for IDF: https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleServer.cpp
     Ported to Arduino ESP32 by Evandro Copercini
     updates by chegewara
@@ -108,7 +108,7 @@ void setup()
     
   //Creating Characteristics
   pTestChar_1 = pTestService->createCharacteristic(                                // Create the characteristic UUID for server
-                                         TEST_CHAR_1,
+                                         BLEUUID(TEST_CHAR_1),
                                          BLECharacteristic::PROPERTY_READ  |
                                          BLECharacteristic::PROPERTY_WRITE |
                                          BLECharacteristic::PROPERTY_NOTIFY |

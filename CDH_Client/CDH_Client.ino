@@ -111,12 +111,17 @@ void autoDiscover(BLEClient* pClient, bool subscribe)
       //Notification Registration if selected
       if(subscribe)
       {
-        subMapItr = charMap.find(selected_char);
-        if ((subMapItr != charMap.end()) && ((subMapItr->second)&REGNOTIF != 0))
+        //subMapItr = charMap.find(selected_char);
+        //if ((subMapItr != charMap.end()) && ((subMapItr->second)&REGNOTIF != 0))
+
+        for (subMapItr = charMap.begin(); subMapItr != charMap.end(); ++subMapItr)
         {
-          BLERemoteCharacteristic* selected_BLERemoteChar = charItr->second;
-          selected_BLERemoteChar->registerForNotify(notifyCallback);
-          Serial.println("--- Found in hashmap, registered for notifications!");
+            if((BLEUUID(subMapItr->first).equals(charItr->second->getUUID())) && ((subMapItr->second)&REGNOTIF != 0))
+             {
+              BLERemoteCharacteristic* selected_BLERemoteChar = charItr->second;
+              selected_BLERemoteChar->registerForNotify(notifyCallback);
+              Serial.println("--- Found in hashmap, registered for notifications!");
+             }
         }
       }
     }
@@ -162,7 +167,7 @@ void setup()
   charMap.insert(std::pair<std::string,byte>("f9fd0001-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0006-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0008-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
-  charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314",REGNOTIF));
+  charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF));
   
   BLEDevice::init("");
   BLEScan* pBLEScan = BLEDevice::getScan();
