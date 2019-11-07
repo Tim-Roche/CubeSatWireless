@@ -8,6 +8,7 @@
 //#include <BLEUtils.h>
 #include <BLEServer.h>
 #include <BLE2902.h>
+#include <string>
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
@@ -17,8 +18,8 @@ std::string  TEST_CHAR_1        =  "770294ed-f345-4f8b-bf3e-063b52d314ab";
 String payloadName = "MVPayload_Quest";
 
 ///// PICTURE BIT MAP //////////////
-size_t iLen = 500;
-const int iLen_int = 500;
+size_t iLen = 1000;
+const int iLen_int = 1000;
 uint8_t image[iLen_int] = {249,249,249,249,249,241,249,241,249,232,
                            157, 70, 52, 45, 52, 38, 57,118,201,249,
                            157, 70, 52, 45, 52, 38, 57,118,201,249,
@@ -72,10 +73,66 @@ uint8_t image[iLen_int] = {249,249,249,249,249,241,249,241,249,232,
                            157, 70, 52, 45, 52, 38, 57,118,201,249,
                            157, 70, 52, 45, 52, 38, 57,118,201,249,
                            157, 70, 52, 45, 52, 38, 57,118,201,249,
-                           157, 70, 52, 45, 52, 38, 57,118,201,249};                         
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+
+                           249,249,249,249,249,241,249,241,249,232,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           
+                           249,249,249,249,249,241,249,241,249,232,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+
+                           249,249,249,249,249,241,249,241,249,232,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+
+                           249,249,249,249,249,241,249,241,249,232,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+
+                           249,249,249,249,249,241,249,241,249,232,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249,
+                           157, 70, 52, 45, 52, 38, 57,118,201,249};                        
         
 uint8_t *image_p = image; //Sets pointer to first element in array
-
+int currentLocation = 0;
+int largeDataSize = 0;
 ///////////////////////////////////
 
 BLEServer *pServer = NULL;
@@ -127,10 +184,27 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       //if(uuid == TEST_CHAR_1)
       if(hit.equals(BLETST))
       {
-         //String message = "Test!";
-         Serial.print("Transmitting...");
-         //Serial.println(message.c_str());
-         pCharacteristic->setValue(image_p, iLen);//message.c_str());
+         if(currentLocation == -1)
+         {
+           pCharacteristic->setValue("");
+         }
+         else
+         {
+           int nextLocation = 0;
+           int packetSize = 500;
+           int endLocation = currentLocation+packetSize;
+           Serial.print("Sending Data # ");
+           Serial.print(currentLocation);
+           nextLocation = currentLocation + packetSize;
+           if(endLocation >= largeDataSize-1)
+           {
+              endLocation = largeDataSize-1;
+              nextLocation = -1;
+           }
+          
+           pCharacteristic->setValue(image_p + currentLocation, (endLocation - currentLocation));//message.c_str());
+           currentLocation = nextLocation;
+         }
       }
       else
       {
@@ -193,21 +267,43 @@ void setup()
   Serial.println("Setup Complete. We are Advertising!");
 }
 
-void sendNotify(BLECharacteristic* chr)
+void sendNotify(BLECharacteristic* chr, int notif = 0)
 {
+  if(notif != 0);
+  {
+    chr->setValue(notif);
+  }
   chr->notify();
+} 
+
+int isNotZero(int num)
+{
+  if(num == 0)
+  {
+    return 0;
+  }
+  return 1;
+}
+
+void sendLargeData(BLECharacteristic* chr, uint8_t *image_p, int len)
+{
+  currentLocation = 0;
+  largeDataSize = len;
+  int totalTranmissions = (len/512) + isNotZero(len%512);
+  sendNotify(chr, totalTranmissions);
 }
 
 void loop() {
   if (deviceConnected) {
      Serial.println("Wow, I am connected!");
      Serial.println("Sending Notification!");
-     sendNotify(pTestChar_1);
+     
+     sendLargeData(pTestChar_1, image_p, iLen_int);
   }
   else
   {
      Serial.print(BLEDevice::getAddress().toString().c_str());
      Serial.println(" Device is not Connected");
-  }
+  } 
   delay(5000);
 }

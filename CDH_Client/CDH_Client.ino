@@ -29,7 +29,7 @@ int TESTPIN = 4;
 
 //Characteristic Map
 byte REGNOTIF = 0x01;
-
+byte MEGADATA = 0x02;
 std::map<std::string,byte> charMap; //Current handles notification registration
 std::stack <BLEAdvertisedDevice*> connectionWaitlist; 
 std::stack <BLERemoteCharacteristic*> messageReadWaitlist; 
@@ -167,8 +167,8 @@ void setup()
   charMap.insert(std::pair<std::string,byte>("f9fd0001-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0006-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0008-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
-  charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF));
-  
+  charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF|MEGADATA));
+   
   BLEDevice::init("");
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
@@ -208,8 +208,8 @@ void checkInbox()
     Serial.println(messageReadWaitlist.size());
     BLERemoteCharacteristic* newValue = messageReadWaitlist.top();
 
+    
     std::string valueString = newValue->readValue();
-    Serial.println(valueString.c_str());
     
     printStringAsBytes(valueString);
     
