@@ -240,7 +240,8 @@ void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t*>valuePair)
       }
       else
       {
-        printStringAsBytes(valueString, false);
+        //printStringAsBytes(valueString, false);
+        
       }
       iterator++;
     }

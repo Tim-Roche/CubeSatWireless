@@ -72,7 +72,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       int packetSize = 500;
       BLEUUID hit = pCharacteristic->getUUID();
       BLEUUID BLETST = BLEUUID(TEST_CHAR_1);
-      Serial.println("Someone wants to read my data: ");
+      //Serial.println("Someone wants to read my data: ");
 
       if(hit.equals(BLETST))
       {
@@ -91,12 +91,12 @@ class MyCallbacks: public BLECharacteristicCallbacks {
               nextLocation = -1;
            }
 
-           Serial.print("CL: ");
-           Serial.print(currentLocation);
-           Serial.print(" :: EL: ");
-           Serial.print(endLocation);
-           Serial.print(" :: MAX: ");
-           Serial.print(largeDataSize-1);
+           //Serial.print("CL: ");
+           //Serial.print(currentLocation);
+           //Serial.print(" :: EL: ");
+           //Serial.print(endLocation);
+           //Serial.print(" :: MAX: ");
+           //Serial.print(largeDataSize-1);
           
            pCharacteristic->setValue(image_p + currentLocation, (endLocation - currentLocation + 1));//message.c_str());
            currentLocation = nextLocation;
