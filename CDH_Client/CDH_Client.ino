@@ -29,10 +29,11 @@ int TESTPIN = 4;
 
 //Characteristic Map
 byte REGNOTIF = 0x01;
-
+byte MEGADATA = 0x02;
 std::map<std::string,byte> charMap; //Current handles notification registration
 std::stack <BLEAdvertisedDevice*> connectionWaitlist; 
-std::stack <BLERemoteCharacteristic*> messageReadWaitlist; 
+//std::stack <BLERemoteCharacteristic*> messageReadWaitlist; 
+std::stack < std::pair<BLERemoteCharacteristic*,uint8_t* > > messageReadWaitlist;
 
 boolean newMail = false;
 
@@ -48,11 +49,7 @@ static void notifyCallback(
     Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
     Serial.print(" of data length ");
     Serial.println(length);
-    Serial.print("data: ");
-    Serial.println((char*)pData);
-    Serial.println("\n");
-    messageReadWaitlist.push(pBLERemoteCharacteristic);
-    newMail = true;
+    messageReadWaitlist.push( std::pair<BLERemoteCharacteristic*, uint8_t*>(pBLERemoteCharacteristic, pData));
 }
 
 class MyClientCallback : public BLEClientCallbacks {
@@ -128,6 +125,7 @@ void autoDiscover(BLEClient* pClient, bool subscribe)
   }
 }; 
 
+
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice advertisedDevice) {
     Serial.print("* ");
@@ -167,8 +165,8 @@ void setup()
   charMap.insert(std::pair<std::string,byte>("f9fd0001-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0006-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0008-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
-  charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF));
-  
+  charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF|MEGADATA));
+   
   BLEDevice::init("");
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
@@ -183,12 +181,15 @@ void debugLED()
   digitalWrite(TESTPIN, HIGH);
 }
 
-void printStringAsBytes(std::string value)
+void printStringAsBytes(std::string value, bool verb)
 {
-  Serial.println(value.c_str());
+  //Serial.println(value.c_str());
   int len = value.length();
-  Serial.print("The len is: ");
-  Serial.println(len);
+  if(verb)
+  {
+    Serial.print("The len is: ");
+    Serial.println(len);
+  }
 
   for(int i = 0; i < len; i++)
   {
@@ -198,6 +199,60 @@ void printStringAsBytes(std::string value)
       Serial.print(",");
     }
   }
+  Serial.println();
+}
+
+byte searchCharMap(BLERemoteCharacteristic* newValue)
+{
+  std::map<std::string, byte>::iterator searchResult;
+  std::string uuid = newValue->getUUID().toString();
+  searchResult = charMap.find(uuid);
+  if (searchResult != charMap.end())
+  {
+     std::string valueString = newValue->readValue();
+     return(searchResult->second);
+  }
+  return(0xFF);
+}
+
+//Eventually will return something, for now just prints out the value
+void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t*>valuePair)
+{
+  Serial.println("In readCharecteristics");
+  std::string valueString;
+  BLERemoteCharacteristic* newValue = valuePair.first;
+  uint8_t* message = valuePair.second;
+  byte flags = searchCharMap(newValue);
+  if((*message != 0) && (flags & MEGADATA != 0))
+  {
+    int tranNumber = (int)(*message);
+    Serial.print("Large Data! Message Len: ");
+    Serial.println(tranNumber);
+    int iterator = 0;
+    int EOT = false; //end of transmission sent by server
+    while((EOT == false) && (iterator < tranNumber))
+    {
+      valueString = newValue->readValue();
+      if(valueString == "")
+      {
+        Serial.println("I recieved an End of Transmission before I thought I would!");
+        EOT = true;
+      }
+      else
+      {
+        //printStringAsBytes(valueString, false);
+        
+      }
+      iterator++;
+    }
+  }
+
+  else
+  {
+    Serial.println("Normal Transmission");
+    valueString = newValue->readValue();
+    printStringAsBytes(valueString, false);
+  }
 }
 
 void checkInbox()
@@ -206,13 +261,11 @@ void checkInbox()
   {
     Serial.print("New Message in Inbox! Messages Unread: ");
     Serial.println(messageReadWaitlist.size());
-    BLERemoteCharacteristic* newValue = messageReadWaitlist.top();
-
-    std::string valueString = newValue->readValue();
-    Serial.println(valueString.c_str());
-    
-    printStringAsBytes(valueString);
-    
+    std::pair<BLERemoteCharacteristic*,uint8_t*> notifyPair = messageReadWaitlist.top();
+    int t = millis();
+    readCharecteristic(notifyPair);
+    Serial.print("Read Time: ");
+    Serial.println(millis() - t);
     messageReadWaitlist.pop();
     debugLED();
   }
