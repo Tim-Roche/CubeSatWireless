@@ -1,5 +1,5 @@
-int payload = 15;
-int CDH = 2;
+int payload = 2;
+int CDH = 15;
 bool done = false;
 bool toggle = false;
 void setup() {
@@ -26,7 +26,12 @@ void loop() {
     {
       endingTime = millis();
       done = true;
+      Serial.println(endingTime - startingTime);
     }
   }
-  Serial.println(endingTime - startingTime);
+  if(digitalRead(payload) == 0)
+  {
+    toggle = false;
+    done = false;
+  }
 }

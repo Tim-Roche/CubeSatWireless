@@ -27,6 +27,8 @@ uint8_t image[iLen_int] = {249,249,249,249,249,241,249,241,249,232,157,70,52,45,
 uint8_t *image_p = image; //Sets pointer to first element in array
 int currentLocation = 0;
 int largeDataSize = 0;
+
+int latPin = 4;
 ///////////////////////////////////
 
 BLEServer *pServer = NULL;
@@ -38,6 +40,15 @@ class MyServerCallbacks: public BLEServerCallbacks {
   // TODO this doesn't take into account several clients being connected
     
     void onConnect(BLEServer* pServer) {
+      BLEDevice::setPower(ESP_PWR_LVL_N14);
+      esp_ble_conn_update_params_t conn_params = {0};
+      memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
+      conn_params.latency = 0; //number of skippable connection events
+      conn_params.max_int = 0x0c; // max_int = 0x0c*1.25ms = 15ms
+      conn_params.min_int = 0x0c; // min_int = 0x0c*1.25ms = 15ms
+      conn_params.timeout = 200;  // timeout = 200*10ms = 2000ms
+      //start sent the update connection parameters to the peer device.
+      esp_ble_gap_update_conn_params(&conn_params);
       BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
       pAdvertising->start();
       deviceConnected = true;
@@ -101,6 +112,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
            pCharacteristic->setValue(image_p + currentLocation, (endLocation - currentLocation + 1));//message.c_str());
            currentLocation = nextLocation;
          }
+         digitalWrite(latPin, HIGH);
       }
       else
       {
@@ -114,7 +126,10 @@ void setup()
   Serial.begin(115200);                                                         // Initialize serial port
   Serial.println("Starting BLE work!");
 
+  pinMode(latPin, OUTPUT);
+
   BLEDevice::init(payloadName.c_str());                                                      // Initialize the BLE device
+  BLEDevice::setPower(ESP_PWR_LVL_N14);
   BLEServer *pServer = BLEDevice::createServer();                               // Save the BLE device server
 
   //Creating Services
@@ -198,7 +213,7 @@ void loop() {
   if (deviceConnected) {
      Serial.println("Wow, I am connected!");
      Serial.println("Sending Notification!");
-     
+
      sendLargeData(pTestChar_1, image_p, iLen_int);
   }
   else
@@ -207,4 +222,5 @@ void loop() {
      Serial.println(" Device is not Connected");
   } 
   delay(5000);
+  digitalWrite(latPin, LOW);
 }

@@ -89,7 +89,7 @@ void autoDiscover(BLEClient* pClient, bool subscribe)
 {
   Serial.println("Avaliable Services:");
   std::map<std::string, byte>::iterator subMapItr; //Iterator for hashmap for auto register
-  
+ 
   std::map<std::string, BLERemoteService*>* services = pClient->getServices();
   std::map<std::string, BLERemoteService*>::iterator itr;
   
@@ -162,12 +162,13 @@ void setup()
   //Eventually there will be a way for user to enter what they want charecteristics they want to register for
   //For now its hard coded. Deal with it.
   charMap.insert(std::pair<std::string,byte>("f9fd0004-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
-  charMap.insert(std::pair<std::string,byte>("f9fd0001-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
+  charMap.insert(std::pair<std::string,byte>("f9fd0001-71ae-42c4-bd19-9d5e37ebf073",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0006-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0008-71ae-42c4-bd19-9d5e37ebf0",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF|MEGADATA));
    
-  BLEDevice::init("");
+  BLEDevice::init("test");
+  BLEDevice::setPower(ESP_PWR_LVL_N14);
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setInterval(1349);
@@ -233,6 +234,7 @@ void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t*>valuePair)
     while((EOT == false) && (iterator < tranNumber))
     {
       valueString = newValue->readValue();
+      debugLED();
       if(valueString == "")
       {
         Serial.println("I recieved an End of Transmission before I thought I would!");
@@ -240,7 +242,7 @@ void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t*>valuePair)
       }
       else
       {
-        //printStringAsBytes(valueString, false);
+        printStringAsBytes(valueString, false);
         
       }
       iterator++;
@@ -259,6 +261,7 @@ void checkInbox()
 {
   if(messageReadWaitlist.size() != 0)
   {
+    
     Serial.print("New Message in Inbox! Messages Unread: ");
     Serial.println(messageReadWaitlist.size());
     std::pair<BLERemoteCharacteristic*,uint8_t*> notifyPair = messageReadWaitlist.top();
@@ -300,6 +303,6 @@ void loop() {
     numConnected = 0;
   }
 
-  
+  digitalWrite(TESTPIN, LOW);
   delay(1000); // Delay a second between loops.
 }
