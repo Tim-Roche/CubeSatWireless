@@ -44,50 +44,50 @@ int numConnected = 0;
 static void notifyCallback(
   BLERemoteCharacteristic* pBLERemoteCharacteristic,uint8_t* pData,size_t length,bool isNotify) 
   {
-    Serial.println("***********************");
-    Serial.print("Notify callback for characteristic ");
-    Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
-    Serial.print(" of data length ");
-    Serial.println(length);
+    //Serial.println("***********************");
+    //Serial.print("Notify callback for characteristic ");
+    //Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
+    //Serial.print(" of data length ");
+    //Serial.println(length);
     messageReadWaitlist.push( std::pair<BLERemoteCharacteristic*, uint8_t*>(pBLERemoteCharacteristic, pData));
 }
 
 class MyClientCallback : public BLEClientCallbacks {
   void onConnect(BLEClient* pclient) {
-        Serial.printf("device connected: %s\n", pclient->getPeerAddress().toString().c_str());
+        //Serial.printf("device connected: %s\n", pclient->getPeerAddress().toString().c_str());
         numConnected++;
-        Serial.print("Devices Connected: ");
-        Serial.println(numConnected);
+        //Serial.print("Devices Connected: ");
+        //Serial.println(numConnected);
   }
 
   void onDisconnect(BLEClient* pclient) {
-    Serial.printf("device disconnected: %s\n", pclient->getPeerAddress().toString().c_str());
-    Serial.println("onDisconnect");
+    //Serial.printf("device disconnected: %s\n", pclient->getPeerAddress().toString().c_str());
+    //Serial.println("onDisconnect");
     numConnected--;
     lastEvent = millis(); //Start the search for the disconnected module
-    Serial.print("Devices Connected: ");
-    Serial.println(numConnected);
+    //Serial.print("Devices Connected: ");
+    //Serial.println(numConnected);
   }
 };
 
 bool connectToServer(BLEAdvertisedDevice* myDevice) {
-    Serial.print("Forming a connection to ");
-    Serial.println(myDevice->getAddress().toString().c_str());
+    //Serial.print("Forming a connection to ");
+    //Serial.println(myDevice->getAddress().toString().c_str());
     
     BLEClient*  pClient  = BLEDevice::createClient();
-    Serial.println("Created client");
+    //Serial.println("Created client");
     pClient->setClientCallbacks(new MyClientCallback());
     pClient->connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
     autoDiscover(pClient, true);
-    Serial.println(" - Connected to server");
+    //Serial.println(" - Connected to server");
     
-    Serial.println("Initialization Complete!");
+    //Serial.println("Initialization Complete!");
     return(true);
 }
 
 void autoDiscover(BLEClient* pClient, bool subscribe)
 {
-  Serial.println("Avaliable Services:");
+  //Serial.println("Avaliable Services:");
   std::map<std::string, byte>::iterator subMapItr; //Iterator for hashmap for auto register
  
   std::map<std::string, BLERemoteService*>* services = pClient->getServices();
@@ -96,14 +96,14 @@ void autoDiscover(BLEClient* pClient, bool subscribe)
   std::string selected_char; //Going to be the string of the currently select charecteristic
   for (itr = services->begin(); itr != services->end(); ++itr)
   {
-    Serial.println((itr->first).c_str());
+    //Serial.println((itr->first).c_str());
     std::map<std::string, BLERemoteCharacteristic*>* character = (itr->second)->getCharacteristics();
     std::map<std::string, BLERemoteCharacteristic*>::iterator charItr;
     for (charItr = character->begin(); charItr != character->end(); ++charItr)
     {
       selected_char = charItr->first; //Grab the selected charecteristic UUID in string form
-      Serial.print("---");
-      Serial.println((charItr->first).c_str());
+      //Serial.print("---");
+      //Serial.println((charItr->first).c_str());
       
       //Notification Registration if selected
       if(subscribe)
@@ -117,7 +117,7 @@ void autoDiscover(BLEClient* pClient, bool subscribe)
              {
               BLERemoteCharacteristic* selected_BLERemoteChar = charItr->second;
               selected_BLERemoteChar->registerForNotify(notifyCallback);
-              Serial.println("--- Found in hashmap, registered for notifications!");
+              //Serial.println("--- Found in hashmap, registered for notifications!");
              }
         }
       }
@@ -128,20 +128,20 @@ void autoDiscover(BLEClient* pClient, bool subscribe)
 
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice advertisedDevice) {
-    Serial.print("* ");
-    Serial.print(advertisedDevice.getAddress().toString().c_str());
-    Serial.print("  ");
-    Serial.println(advertisedDevice.toString().c_str());
+    //Serial.print("* ");
+    //Serial.print(advertisedDevice.getAddress().toString().c_str());
+    //Serial.print("  ");
+    //Serial.println(advertisedDevice.toString().c_str());
    
 
     // We have found a device, let us now see if it contains the service we are looking for.
     if (advertisedDevice.getAddress().equals(deviceAddr1) || advertisedDevice.getAddress().equals(deviceAddr2) ||  advertisedDevice.getAddress().equals(deviceAddr3) ||  advertisedDevice.getAddress().equals(deviceAddr4)) //Make this not hard coded
     {
-      Serial.printf("!! Match with %s \n", advertisedDevice.getAddress().toString().c_str());
+      //Serial.printf("!! Match with %s \n", advertisedDevice.getAddress().toString().c_str());
       //BLEDevice::getScan()->stop();
       BLEAdvertisedDevice* newDevice = new BLEAdvertisedDevice(advertisedDevice);
       connectionWaitlist.push(newDevice);
-      Serial.println("Pushing to stack!");
+      //Serial.println("Pushing to stack!");
       scanning = true;
     } 
   } 
@@ -184,23 +184,23 @@ void debugLED()
 
 void printStringAsBytes(std::string value, bool verb)
 {
-  //Serial.println(value.c_str());
+  ////Serial.println(value.c_str());
   int len = value.length();
   if(verb)
   {
-    Serial.print("The len is: ");
-    Serial.println(len);
+    //Serial.print("The len is: ");
+    //Serial.println(len);
   }
 
   for(int i = 0; i < len; i++)
   {
-    Serial.print((uint8_t)value[i]);
+    //Serial.print((uint8_t)value[i]);
     if(i+1 != len)
     {
-      Serial.print(",");
+      //Serial.print(",");
     }
   }
-  Serial.println();
+  //Serial.println();
 }
 
 byte searchCharMap(BLERemoteCharacteristic* newValue)
@@ -219,7 +219,7 @@ byte searchCharMap(BLERemoteCharacteristic* newValue)
 //Eventually will return something, for now just prints out the value
 void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t*>valuePair)
 {
-  Serial.println("In readCharecteristics");
+  //Serial.println("In readCharecteristics");
   std::string valueString;
   BLERemoteCharacteristic* newValue = valuePair.first;
   uint8_t* message = valuePair.second;
@@ -227,8 +227,8 @@ void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t*>valuePair)
   if((*message != 0) && (flags & MEGADATA != 0))
   {
     int tranNumber = (int)(*message);
-    Serial.print("Large Data! Message Len: ");
-    Serial.println(tranNumber);
+    //Serial.print("Large Data! Message Len: ");
+    //Serial.println(tranNumber);
     int iterator = 0;
     int EOT = false; //end of transmission sent by server
     while((EOT == false) && (iterator < tranNumber))
@@ -237,7 +237,7 @@ void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t*>valuePair)
       debugLED();
       if(valueString == "")
       {
-        Serial.println("I recieved an End of Transmission before I thought I would!");
+        //Serial.println("I recieved an End of Transmission before I thought I would!");
         EOT = true;
       }
       else
@@ -251,7 +251,7 @@ void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t*>valuePair)
 
   else
   {
-    Serial.println("Normal Transmission");
+    //Serial.println("Normal Transmission");
     valueString = newValue->readValue();
     printStringAsBytes(valueString, false);
   }
@@ -262,12 +262,12 @@ void checkInbox()
   if(messageReadWaitlist.size() != 0)
   {
     
-    Serial.print("New Message in Inbox! Messages Unread: ");
-    Serial.println(messageReadWaitlist.size());
+    //Serial.print("New Message in Inbox! Messages Unread: ");
+    //Serial.println(messageReadWaitlist.size());
     std::pair<BLERemoteCharacteristic*,uint8_t*> notifyPair = messageReadWaitlist.top();
     int t = millis();
     readCharecteristic(notifyPair);
-    Serial.print("Read Time: ");
+    //Serial.print("Read Time: ");
     Serial.println(millis() - t);
     messageReadWaitlist.pop();
     debugLED();
@@ -276,8 +276,8 @@ void checkInbox()
 
 void loop() {
   if (connectionWaitlist.size() != 0) {
-    Serial.print("Remaining on Stack:");
-    Serial.println(connectionWaitlist.size());
+    //Serial.print("Remaining on Stack:");
+    //Serial.println(connectionWaitlist.size());
     connectToServer(connectionWaitlist.top());
     connectionWaitlist.pop();
   }
@@ -286,20 +286,20 @@ void loop() {
   if ((scanning) && (ms >= lastEvent + threshold)) {
     BLEDevice::getScan()->stop();
     scanning = false;
-    Serial.println("Scanning Complete!");
-    Serial.println("!!!!!!!!!!!!!!!!!!!!!!!!");
+    //Serial.println("Scanning Complete!");
+    //Serial.println("!!!!!!!!!!!!!!!!!!!!!!!!");
   }
 
-  Serial.print("numConnected: ");
-  Serial.println(numConnected);
+  //Serial.print("numConnected: ");
+  //Serial.println(numConnected);
   if (numConnected > 0) {
-    Serial.println("There is a device connected");
+    //Serial.println("There is a device connected");
     checkInbox();
     
   }
   else
   {
-    Serial.println("0 are connected right now!");
+    //Serial.println("0 are connected right now!");
     numConnected = 0;
   }
 
