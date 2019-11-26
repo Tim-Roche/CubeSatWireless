@@ -1,0 +1,52 @@
+What's needed to change:
+
+- Dont have to go over every minute detail
+	o Just support one central arguement
+
+- Why show maximum distance? It's not relevent (we're looking for small distance)
+	o Want to minimize communication
+		* remove Tx range column and find minimum range if possible
+	o More focus on minimum distance
+
+- Set Tx Power and Rx ensitivity to minimum values
+
+- Be careful with resolutions
+	o Approximate values to whole numbers only (unless absolutely necessary)
+
+- Put module names in the standards chart 1 so the ranges make sense, or find standard given ranges
+
+- Make sure BLE provides reasonable numbers for all parts of chart 1
+
+- Either fix or explain Bluetooth's 100ms latency
+
+- BLE payload: up to 27 bytes; Bluetooth payload: up to 251 bytes
+
+- Add reasons as to why BLE is better than Zigbee
+	o BLE frequency hop
+	o BLE less power
+	o BLE faster
+	o GATT makes BLE nice
+	o BLE has star networking capability and mesh being developed
+		* Zigbee has only mesh
+
+- Cite Throughputs
+
+- Change some "communication"s to "interface"s and "RF" to "wireless" or "radio"
+
+- Fix Title & abstract
+	o Adam is doing the abstract
+
+- Add some pictures & captions
+	o Give breif summary with the captions
+	o More detail & description to each picture caption
+
+- Too many pages, optimize redundant information
+
+- Add acknowledgement for NJS
+
+- PC/104 needs to be excluded from keywords
+	o Target low power, low latency, wireless, Bluetooth
+
+- Spellcheck
+
+- Change volumes to area
