@@ -17,6 +17,10 @@
 
 std::string   TEST_SERVICE_UUID =  "24c2317b-e845-4cbc-bb4c-fbb93e51f72e";
 std::string  TEST_CHAR_1        =  "770294ed-f345-4f8b-bf3e-063b52d314ab";
+#define  CHEST_SERVICE_UUID  "f9fd0005-71ae-42c4-bd19-9d5e37ebf073"
+#define  CHEST_CHAR_1        "f9fd0006-71ae-42c4-bd19-9d5e37ebf073"
+#define  CHEST_CHAR_2        "f9fd0016-71ae-42c4-bd19-9d5e37ebf073"
+#define  CHEST_CHAR_3        "f9fd0017-71ae-42c4-bd19-9d5e37ebf073"
 
 String payloadName = "MVPayload_Quest";
 
@@ -33,14 +37,18 @@ int latPin = 4;
 ///////////////////////////////////
 
 BLEServer *pServer = NULL;
+BLEServer *gServer = NULL;
 BLECharacteristic * pTestChar_1;
+BLECharacteristic * pChestChar_1;
+BLECharacteristic * pChestChar_2;
+BLECharacteristic * pChestChar_3;
 
 bool deviceConnected = false;
 
 class MyServerCallbacks: public BLEServerCallbacks {
   // TODO this doesn't take into account several clients being connected
     
-    void onConnect(BLEServer* pServer) {
+    void onConnect() {
       BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
       pAdvertising->start();
       deviceConnected = true;
@@ -158,6 +166,45 @@ void setup()
   //pBestService->start();   
   
   pServer->setCallbacks(new MyServerCallbacks());                               // Set server callbacks
+
+  BLEServer *gServer = BLEDevice::createServer();                               // Save the BLE device server
+
+  //Creating Services
+  BLEService *gChestService = gServer->createService(CHEST_SERVICE_UUID);                 // Create the service UUID from the server
+
+    
+  //Creating Characteristics
+  pChestChar_1 = gChestService->createCharacteristic(                                // Create the characteristic UUID for server
+                                         CHEST_CHAR_1,
+                                         BLECharacteristic::PROPERTY_READ  |
+                                         BLECharacteristic::PROPERTY_WRITE |
+                                         BLECharacteristic::PROPERTY_NOTIFY |
+                                         BLECharacteristic::PROPERTY_INDICATE
+                                       );
+  pChestChar_1->setCallbacks(new MyCallbacks()); 
+  pChestChar_1->addDescriptor(new BLE2902());
+
+  pChestChar_2 = gChestService->createCharacteristic(                                // Create the characteristic UUID for server
+                                         CHEST_CHAR_2,
+                                         BLECharacteristic::PROPERTY_READ  |
+                                         BLECharacteristic::PROPERTY_WRITE |
+                                         BLECharacteristic::PROPERTY_NOTIFY |
+                                         BLECharacteristic::PROPERTY_INDICATE
+                                       );
+  pChestChar_2->setCallbacks(new MyCallbacks()); 
+  pChestChar_2->addDescriptor(new BLE2902());
+
+  pChestChar_3 = gChestService->createCharacteristic(                                // Create the characteristic UUID for server
+                                         CHEST_CHAR_3,
+                                         BLECharacteristic::PROPERTY_READ  |
+                                         BLECharacteristic::PROPERTY_WRITE |
+                                         BLECharacteristic::PROPERTY_NOTIFY |
+                                         BLECharacteristic::PROPERTY_INDICATE
+                                       );
+  pChestChar_3->setCallbacks(new MyCallbacks()); 
+  pChestChar_3->addDescriptor(new BLE2902());
+  
+  gChestService->start();                                     
   
   //Advertising
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();                   // Grab advertisiing service
@@ -191,7 +238,7 @@ int isNotZero(int num)
 }
 
 void sendLargeData(BLECharacteristic* chr, uint8_t *image_p, int len)
-{
+{a
   Serial.println("Configuring Large Data");
   currentLocation = 0;
   largeDataSize = len;
@@ -205,15 +252,20 @@ void loop() {
   if (deviceConnected) {
      Serial.println("Wow, I am connected!");
      Serial.println("Sending Notification!");
-
-     sendLargeData(pTestChar_1, image_p, iLen_int);
+     int randNumber = random(1);
+     if(randNumber == 0)
+     {
+      sendLargeData(pTestChar_1, image_p, iLen_int);
+     }
+     else
+     {
+      sendNotify(pChestChar_1);
+     }
   }
   else
   {
      Serial.print(BLEDevice::getAddress().toString().c_str());
      Serial.println(" Device is not Connected");
   } 
-  delay(250);
-  digitalWrite(latPin, LOW);
-  delay(25000);
+  delay(1000);
 }

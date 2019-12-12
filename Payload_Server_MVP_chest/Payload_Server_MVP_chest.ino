@@ -12,16 +12,17 @@
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-
-
 String payloadName = "MVPayload_CHEST";
 
 #define  CHEST_SERVICE_UUID  "f9fd0005-71ae-42c4-bd19-9d5e37ebf073"
 #define  CHEST_CHAR_1        "f9fd0006-71ae-42c4-bd19-9d5e37ebf073"
+#define  CHEST_CHAR_2        "f9fd0016-71ae-42c4-bd19-9d5e37ebf073"
+#define  CHEST_CHAR_3        "f9fd0017-71ae-42c4-bd19-9d5e37ebf073"
 
 BLEServer *pServer = NULL;
 BLECharacteristic * pChestChar_1;
-
+BLECharacteristic * pChestChar_2;
+BLECharacteristic * pChestChar_3;
 
 bool deviceConnected = false;
 
@@ -63,9 +64,14 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       String uuid = pCharacteristic->getUUID().toString().c_str();
       Serial.print("Someone wants to read my data: ");
       Serial.println(uuid.c_str());
-      if(uuid == CHEST_CHAR_1)
+      BLEUUID hit = pCharacteristic->getUUID();
+      BLEUUID BLETST = BLEUUID(CHEST_CHAR_1);
+      //Serial.println("Someone wants to read my data: ");
+
+      if(hit.equals(BLETST))
       {
-         String message = "Test!";
+         String randNumber = String(random(300));
+         String message = randNumber;
          Serial.print("Transmitting: ");
          Serial.println(message.c_str());
          pCharacteristic->setValue(message.c_str());
@@ -97,20 +103,9 @@ void setup()
                                          BLECharacteristic::PROPERTY_NOTIFY |
                                          BLECharacteristic::PROPERTY_INDICATE
                                        );
-
-  /*pBestChar_1 = pBestService->createCharacteristic(                                // Create the characteristic UUID for server
-                                         BEST_CHAR_1,
-                                         BLECharacteristic::PROPERTY_READ  |
-                                         BLECharacteristic::PROPERTY_WRITE |
-                                         BLECharacteristic::PROPERTY_NOTIFY |
-                                         BLECharacteristic::PROPERTY_INDICATE
-                                       );
-  */
   pChestChar_1->setCallbacks(new MyCallbacks()); 
-
   pChestChar_1->addDescriptor(new BLE2902());
-
- 
+  
   pChestService->start();                                                            // Start service
 
  
@@ -128,6 +123,8 @@ void setup()
 
 void sendNotify(BLECharacteristic* chr)
 {
+  int notif = 0;
+  chr->setValue((uint32_t&)notif); 
   chr->notify();
 }
 
