@@ -213,7 +213,5 @@ void loop() {
      Serial.print(BLEDevice::getAddress().toString().c_str());
      Serial.println(" Device is not Connected");
   } 
-  delay(250);
-  digitalWrite(latPin, LOW);
-  delay(25000);
+  delay(12000);
 }

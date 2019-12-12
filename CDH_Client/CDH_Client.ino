@@ -37,6 +37,8 @@ std::stack < std::pair<BLERemoteCharacteristic*,uint8_t > > messageReadWaitlist;
 
 boolean newMail = false;
 
+boolean photoTran = false;
+
 BLERemoteCharacteristic* newRemoteChar;
 
 int numConnected = 0;
@@ -229,6 +231,7 @@ void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t>valuePair)
   Serial.println(flags);
   if((message != 0) && (flags&MEGADATA != 0))
   {
+    photoTran = true;
     int tranNumber = (int)(message);
     Serial.print("Large Data! Message Len: ");
     Serial.println(tranNumber);
@@ -250,6 +253,7 @@ void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t>valuePair)
       }
       iterator++;
     }
+    photoTran = false;
   }
   else
   {
@@ -307,5 +311,5 @@ void loop() {
   }
 
   digitalWrite(TESTPIN, LOW);
-  delay(1000); // Delay a second between loops.
+  delay(500); // Delay a second between loops.
 }

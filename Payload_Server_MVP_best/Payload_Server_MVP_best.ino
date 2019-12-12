@@ -195,5 +195,7 @@ void loop() {
      Serial.print(BLEDevice::getAddress().toString().c_str());
      Serial.println(" Device is not Connected");
   }
-  delay(5000);
+  int randNumber = random(4,10);
+  delay(randNumber*1000);
+  delay((10-randNumber + 10)*1000);
 }
