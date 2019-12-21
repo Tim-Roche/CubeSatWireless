@@ -1,1 +1,0 @@
-im = imread("C:\Users\TimRo\Documents\Github\CubeSatWireless\TestImage.bmp");
