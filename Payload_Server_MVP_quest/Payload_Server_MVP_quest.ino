@@ -41,6 +41,15 @@ class MyServerCallbacks: public BLEServerCallbacks {
   // TODO this doesn't take into account several clients being connected
     
     void onConnect(BLEServer* pServer) {
+      BLEDevice::setPower(ESP_PWR_LVL_N14);
+      esp_ble_conn_update_params_t conn_params = {0};
+      memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
+      conn_params.latency = 0; //number of skippable connection events
+      conn_params.max_int = 0x06; // max_int = 0x0c*1.25ms = 15ms
+      conn_params.min_int = 0x06; // min_int = 0x0c*1.25ms = 15ms
+      conn_params.timeout = 200;  // timeout = 200*10ms = 2000ms
+      //start sent the update connection parameters to the peer device.
+      esp_ble_gap_update_conn_params(&conn_params);
       BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
       pAdvertising->start();
       deviceConnected = true;
