@@ -11,7 +11,7 @@
 //Device Configuration
 static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
 static BLEAddress deviceAddr2 = BLEAddress("cc:50:e3:a8:40:fe");
-static BLEAddress deviceAddr3 = BLEAddress("a4:cf:12:73:67:32");
+static BLEAddress deviceAddr3 = BLEAddress("a4:cf:12:1e:48:fa"); 
 static BLEAddress deviceAddr4 = BLEAddress("3c:71:bf:71:00:36");
 
 static BLERemoteCharacteristic* pGryoChar_1;
@@ -107,7 +107,6 @@ void autoDiscover(BLEClient* pClient, bool subscribe)
       selected_char = charItr->first; //Grab the selected charecteristic UUID in string form
       Serial.print("---");
       Serial.println((charItr->first).c_str());
-      
       //Notification Registration if selected
       if(subscribe)
       {
@@ -168,7 +167,8 @@ void setup()
   charMap.insert(std::pair<std::string,byte>("f9fd0016-71ae-42c4-bd19-9d5e37ebf073",REGNOTIF));
   charMap.insert(std::pair<std::string,byte>("f9fd0017-71ae-42c4-bd19-9d5e37ebf073",REGNOTIF));
 
-  charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF|MEGADATA));
+  //charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF|MEGADATA));
+  charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF));
   
   BLEDevice::init("test");
   BLEDevice::setPower(ESP_PWR_LVL_N14);
@@ -179,6 +179,7 @@ void setup()
   pBLEScan->setActiveScan(true);
   pBLEScan->start(5, false);
 } 
+
 
 void debugLED()
 {
@@ -220,19 +221,19 @@ byte searchCharMap(BLERemoteCharacteristic* newValue)
 }
 
 //Eventually will return something, for now just prints out the value
-void readCharecteristic(std::pair<BLERemoteCharacteristic*,uint8_t>valuePair)
+void readCharecteristic(BLERemoteCharacteristic* newValue, uint8_t size)
 {
   Serial.println("In readCharecteristics");
   std::string valueString;
-  BLERemoteCharacteristic* newValue = valuePair.first;
-  uint8_t message = valuePair.second;
+  //BLERemoteCharacteristic* newValue = valuePair.first;
+  //uint8_t message = valuePair.second;
   byte flags = searchCharMap(newValue);
-  Serial.println(message);
+  Serial.println(size);
   Serial.println(flags);
-  if((message != 0) && (flags&MEGADATA != 0))
+  if((size != 0) && (flags&MEGADATA != 0))
   {
     photoTran = true;
-    int tranNumber = (int)(message);
+    int tranNumber = (int)(size);
     Serial.print("Large Data! Message Len: ");
     Serial.println(tranNumber);
     int iterator = 0;
@@ -273,7 +274,9 @@ void checkInbox()
     Serial.println(messageReadWaitlist.size());
     std::pair<BLERemoteCharacteristic*,uint8_t> notifyPair = messageReadWaitlist.top();
     int t = millis();
-    readCharecteristic(notifyPair);
+    BLERemoteCharacteristic* newValue = notifyPair.first;
+    uint8_t size = notifyPair.second;
+    readCharecteristic(newValue, size);
     Serial.print("Read Time: ");
     Serial.println(millis() - t);
     messageReadWaitlist.pop();
@@ -302,7 +305,6 @@ void loop() {
   if (numConnected > 0) {
     Serial.println("There is a device connected");
     checkInbox();
-    
   }
   else
   {

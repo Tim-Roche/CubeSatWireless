@@ -14,11 +14,13 @@
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
+HardwareSerial Serial123(1);
+
 class MyServerCallbacks: public BLEServerCallbacks {
   // TODO this doesn't take into account several clients being connected
     
     void onConnect(BLEServer* pServer) {
-      BLEDevice::setPower(ESP_PWR_LVL_P5);
+      BLEDevice::setPower(ESP_PWR_LVL_N14);
     };
     
     void onDisconnect(BLEServer* pServer) {
@@ -32,6 +34,7 @@ void setup() {
 
   BLEDevice::init("Long name works now");
   BLEServer *pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());  
   BLEService *pService = pServer->createService(SERVICE_UUID);
   BLECharacteristic *pCharacteristic = pService->createCharacteristic(
                                          CHARACTERISTIC_UUID,
@@ -40,7 +43,7 @@ void setup() {
                                        );
 
   pCharacteristic->setValue("Hello World says Neil");
-  pCharacteristic->setCallbacks(new MyCallbacks()); 
+  //pCharacteristic->setCallbacks(new MyCallbacks()); 
   pService->start();
   // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
