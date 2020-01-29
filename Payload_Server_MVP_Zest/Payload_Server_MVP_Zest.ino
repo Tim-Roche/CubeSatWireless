@@ -104,8 +104,6 @@ class MyCallbacks: public BLECharacteristicCallbacks {
    }
 };
 
-
-
 std::string getValue(std::string data, char separator, int index, bool guard=false)
 {
     int found = 0;
@@ -125,6 +123,18 @@ std::string getValue(std::string data, char separator, int index, bool guard=fal
     return found > index ? data.substr(strIndex[0], strIndex[1]-strIndex[0]) : "";
 }
 
+void sendNotify(BLECharacteristic* chr, int notif = 0)
+{
+  if(notif != 0);
+  {
+    Serial.println("Setting Notify Value");
+    chr->setValue((uint32_t&)notif); 
+  }
+  chr->notify();
+  Serial.println("Notification Sent");
+} 
+
+
 void interpretCommand(std::string input)
 {
   std::string modifier = getValue(input, ' ', 0);
@@ -136,7 +146,7 @@ void interpretCommand(std::string input)
   Serial.println(UUID.c_str());
   Serial.print("Payload: ");
   Serial.println(payload.c_str());
-  if (modifier == "Update")
+  if ((modifier == "Update") || (modifier == "UpdateN"))
   {
   	Serial.println("Update");
   	//Update Value
@@ -147,6 +157,10 @@ void interpretCommand(std::string input)
     {
     	//TODO: Need check to see if data needs the largeDataFunction
     	out->setValue(payload); 
+      if(modifier == "UpdateN")
+      {
+        sendNotify(out);
+      }
     }
     else
     {
@@ -235,16 +249,6 @@ void setup()
   Serial.println("Setup Complete. We are Advertising!");
 }
 
-void sendNotify(BLECharacteristic* chr, int notif = 0)
-{
-  if(notif != 0);
-  {
-    Serial.println("Setting Notify Value");
-    chr->setValue((uint32_t&)notif); 
-  }
-  chr->notify();
-  Serial.println("Notification Sent");
-} 
 
 int isNotZero(int num)
 {
