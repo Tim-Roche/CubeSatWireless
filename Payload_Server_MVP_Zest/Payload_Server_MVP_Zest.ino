@@ -20,6 +20,7 @@ std::string   TEST_SERVICE_UUID =  "24c2317b-e845-4cbc-bb4c-fbb93e51f72e";
 std::string  TEST_CHAR_1        =  "770294ed-f345-4f8b-bf3e-063b52d314ab";
 
 std::map<std::string, BLECharacteristic*> charMap;
+std::map<std::string, std::string> notifMap;
 
 String payloadName = "MVPayload_Zest";
 
@@ -33,6 +34,19 @@ BLEServer *pServer = NULL;
 BLECharacteristic* pTestChar_1;
 
 bool deviceConnected = false;
+
+std::string readWriteNotif(std::string newValue, std::string data= "")
+{
+  if(data != "")
+  {
+    notifMap[newValue] = data;
+  }
+  if (notifMap.find(newValue) != notifMap.end())
+  {
+    return(notifMap[newValue]);
+  }
+  return("");
+}
 
 class MyServerCallbacks: public BLEServerCallbacks {
   // TODO this doesn't take into account several clients being connected
@@ -74,10 +88,17 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       BLEUUID hit = pCharacteristic->getUUID();
       BLEUUID BLETST = BLEUUID(TEST_CHAR_1);
       //Serial.println("Someone wants to read my data: ");
-
+      
       if(hit.equals(BLETST))
       {
-         if(currentLocation == -1)
+         std::string output = readWriteNotif(TEST_CHAR_1);
+         notifMap.erase(TEST_CHAR_1);
+         if(output != "")
+         {
+            pCharacteristic->setValue(output);
+         }
+         Serial.println("You are BLETEST! Nothing special is going to happen!");
+         /*if(currentLocation == -1)
          {
            pCharacteristic->setValue("");
          }
@@ -95,7 +116,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
            pCharacteristic->setValue(image_p + currentLocation, (endLocation - currentLocation + 1));//message.c_str());
            currentLocation = nextLocation;
          }
-         digitalWrite(latPin, HIGH);
+         digitalWrite(latPin, HIGH);*/
       }
       else
       {
@@ -103,6 +124,17 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       }
    }
 };
+
+BLECharacteristic* searchCharMap(std::string newValue)
+{
+  if (charMap.find(newValue) != charMap.end())
+  {
+    return(charMap[newValue]);
+  }
+  return(NULL);
+}
+
+
 
 std::string getValue(std::string data, char separator, int index, bool guard=false)
 {
@@ -125,11 +157,10 @@ std::string getValue(std::string data, char separator, int index, bool guard=fal
 
 void sendNotify(BLECharacteristic* chr, int notif = 0)
 {
-  if(notif != 0);
-  {
-    Serial.println("Setting Notify Value");
-    chr->setValue((uint32_t&)notif); 
-  }
+
+  Serial.println("Setting Notify Value");
+  chr->setValue((uint32_t&)notif); 
+
   chr->notify();
   Serial.println("Notification Sent");
 } 
@@ -159,7 +190,9 @@ void interpretCommand(std::string input)
     	out->setValue(payload); 
       if(modifier == "UpdateN")
       {
+        readWriteNotif(UUID.c_str(), payload);
         sendNotify(out);
+        
       }
     }
     else
@@ -191,16 +224,7 @@ void interpretCommand(std::string input)
   }
 }
 
-BLECharacteristic* searchCharMap(std::string newValue)
-{
-  if (charMap.find(newValue) != charMap.end())
-  {
-  	Serial.println("Found in Char Map!");
-  	return(charMap[newValue]);
-  }
-  Serial.println("Item not fount in charmap!");
-  return(NULL);
-}
+
 
 void setup()
 {
@@ -299,5 +323,5 @@ void loop() {
   	interpretCommand(output.c_str());
   }
 
-  delay(12000);
+  delay(120);
 }
