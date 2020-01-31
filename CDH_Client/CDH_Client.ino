@@ -30,7 +30,7 @@ int TESTPIN = 4;
 //Characteristic Map
 byte REGNOTIF = 0x01;
 byte MEGADATA = 0x02;
-std::map<std::string,byte> charMap; //Current handles notification registration
+std::map<std::string, std::pair<BLERemoteCharacteristic*, byte> charMap; //Current handles notification registration
 std::stack <BLEAdvertisedDevice*> connectionWaitlist; 
 //std::stack <BLERemoteCharacteristic*> messageReadWaitlist; 
 std::stack < std::pair<BLERemoteCharacteristic*,uint8_t > > messageReadWaitlist;
@@ -83,7 +83,6 @@ bool connectToServer(BLEAdvertisedDevice* myDevice) {
     pClient->connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
     autoDiscover(pClient, true);
     Serial.println(" - Connected to server");
-    
     Serial.println("Initialization Complete!");
     return(true);
 }

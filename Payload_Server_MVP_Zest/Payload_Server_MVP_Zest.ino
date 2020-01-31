@@ -214,14 +214,6 @@ void interpretCommand(std::string input)
       Serial.println("Improper Syntax!");
     }
   }
-  if (modifier == "A")
-  {
-      //Autodiscover
-  }
-  if (modifier == "N")
-  {
-      //Check Notifications
-  }
 }
 
 
