@@ -1,13 +1,9 @@
-/**
- * A BLE client example that is rich in capabilities.
- * There is a lot new capabilities implemented.
- * author unknown
- * updated by chegewara
- */
+//CDH BLE Module For Rowan University Wireless Cubesat Clinic Project
+//2019-2020: Tim Roche, Kenny Wagner, Jake Matteo
 
 #include "BLEDevice.h"
 #include <stack>
-
+#include "charStruct.h"
 //Device Configuration
 static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
 static BLEAddress deviceAddr2 = BLEAddress("cc:50:e3:a8:40:fe");
@@ -30,7 +26,7 @@ int TESTPIN = 4;
 //Characteristic Map
 byte REGNOTIF = 0x01;
 byte MEGADATA = 0x02;
-std::map<std::string, std::pair<BLERemoteCharacteristic*, byte> charMap; //Current handles notification registration
+std::map<std::string, byte> charMap; //Current handles notification registration
 std::stack <BLEAdvertisedDevice*> connectionWaitlist; 
 //std::stack <BLERemoteCharacteristic*> messageReadWaitlist; 
 std::stack < std::pair<BLERemoteCharacteristic*,uint8_t > > messageReadWaitlist;
