@@ -5,6 +5,7 @@
 #include <stack>
 #include "charStruct.h"
 #include "parser.h" //For parsing functions, its really small right now but it should grow in the future
+#include <string>
 //Device Configuration
 static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
 static BLEAddress deviceAddr2 = BLEAddress("cc:50:e3:a8:40:fe");
@@ -149,7 +150,7 @@ void initLatency()
 void interpretCommand(std::string input)
 {
   std::string modifier = getValue(input, ' ', 0);
-  std::string  UUID    = getValue(input, ' ', 1);
+  std::string  UUID    = getValue(input, ' ', 1); // "770294ed-f345-4f8b-bf3e-063b52d314ab";
   std::string  payload   = getValue(input, ' ' , 2, true); //guard = true, allows for spaces in data
   Serial.print("Modifier: ");
   Serial.println(modifier.c_str());
@@ -169,13 +170,14 @@ void interpretCommand(std::string input)
     //Insert into Charmap
     //Autodiscover
   }*/
-
-  if (charMap.find(UUID) == charMap.end())
+  std::map<std::string, charStruct>::iterator it;
+  it = charMap.find(UUID);
+  if (it == charMap.end())
   {
     Serial.println("Cannot find in char map!");
     return;
   }
-  charStruct out = charMap[UUID];
+  charStruct out = it->second;
   BLERemoteCharacteristic* bleChar = out.getCharecteristic();
   if (modifier == "Update")
   {
@@ -286,7 +288,6 @@ void readCharecteristic(BLERemoteCharacteristic* newValue, uint8_t size)
       else
       {
         printStringAsBytes(valueString, false);
-        
       }
       iterator++;
     }
