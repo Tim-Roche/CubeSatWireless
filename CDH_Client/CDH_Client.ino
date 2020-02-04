@@ -6,6 +6,11 @@
 #include "charStruct.h"
 #include "parser.h" //For parsing functions, its really small right now but it should grow in the future
 #include <string>
+
+//UART COMMS
+#define RXD2 16
+#define TXD2 17
+
 //Device Configuration
 static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
 static BLEAddress deviceAddr2 = BLEAddress("cc:50:e3:a8:40:fe");
@@ -20,8 +25,6 @@ static unsigned long ms;
 static unsigned long lastEvent = 0;
 static unsigned long threshold = 60000;
 boolean scanning = true;
-
-int TESTPIN = 4;
 
 //Characteristic Map
 byte REGNOTIF = 0x01;
@@ -64,19 +67,7 @@ class MyClientCallback : public BLEClientCallbacks {
   }
 };
 
-bool connectToServer(BLEAdvertisedDevice* myDevice) {
-    Serial.print("Forming a connection to ");
-    Serial.println(myDevice->getAddress().toString().c_str());
-    
-    BLEClient*  pClient  = BLEDevice::createClient();
-    Serial.println("Created client");
-    pClient->setClientCallbacks(new MyClientCallback());
-    pClient->connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
-    autoDiscover(pClient, true);
-    Serial.println(" - Connected to server");
-    Serial.println("Initialization Complete!");
-    return(true);
-}
+
 
 void autoDiscover(BLEClient* pClient, bool subscribe)
 {
@@ -118,6 +109,19 @@ void autoDiscover(BLEClient* pClient, bool subscribe)
     }
   } 
 
+bool connectToServer(BLEAdvertisedDevice* myDevice) {
+    Serial.print("Forming a connection to ");
+    Serial.println(myDevice->getAddress().toString().c_str());
+    
+    BLEClient*  pClient  = BLEDevice::createClient();
+    Serial.println("Created client");
+    pClient->setClientCallbacks(new MyClientCallback());
+    pClient->connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
+    autoDiscover(pClient, true);
+    Serial.println(" - Connected to server");
+    Serial.println("Initialization Complete!");
+    return(true);
+}
 
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice advertisedDevice) {
@@ -140,12 +144,6 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
   } 
 }; 
 
-void initLatency()
-{
-  pinMode(TESTPIN, OUTPUT);
-  digitalWrite(TESTPIN, LOW);
-}
-
 
 void interpretCommand(std::string input)
 {
@@ -158,8 +156,6 @@ void interpretCommand(std::string input)
   Serial.println(UUID.c_str());
   Serial.print("Payload: ");
   Serial.println(payload.c_str());
-
-
 
   /*if(modifier == "Show")
   {
@@ -184,6 +180,7 @@ void interpretCommand(std::string input)
     //Impliment Large Data support
      bleChar->writeValue(payload); 
      Serial.println("Update Complete!");
+     Serial2.println("[Completed]");
   }
   if (modifier == "Read")
   {
@@ -194,11 +191,20 @@ void interpretCommand(std::string input)
 
 }
 
+//Initilizes UART between PC -> ESP
+//and between ESP -> MCU
+void init_UART()
+{
+  Serial.begin(115200);   
+  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial.println("Serial Txd is on pin: "+String(TX));
+  Serial.println("Serial Rxd is on pin: "+String(RX));
+}
+
 void setup() 
 {  
-  Serial.begin(115200);
-  Serial.println("Starting Arduino BLE Client application...");
-  initLatency();
+  init_UART();
+  Serial.println("CDH");
   //User Charecteristic Registration Requirements
   //Eventually there will be a way for user to enter what they want charecteristics they want to register for
   //For now its hard coded. Deal with it.
@@ -208,7 +214,7 @@ void setup()
 
   charMap.insert(std::pair<std::string,charStruct>("770294ed-f345-4f8b-bf3e-063b52d314ab",charStruct(REGNOTIF)));
   
-  BLEDevice::init("test");
+  BLEDevice::init("CDH");
   BLEDevice::setPower(ESP_PWR_LVL_N14);
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
@@ -219,10 +225,6 @@ void setup()
 } 
 
 
-void debugLED()
-{
-  digitalWrite(TESTPIN, HIGH);
-}
 
 void printStringAsBytes(std::string value, bool verb)
 {
@@ -258,6 +260,7 @@ charStruct* searchCharMap(BLERemoteCharacteristic* newValue)
   return(NULL);
 }
 
+
 //Eventually will return something, for now just prints out the value
 void readCharecteristic(BLERemoteCharacteristic* newValue, uint8_t size)
 {
@@ -279,7 +282,6 @@ void readCharecteristic(BLERemoteCharacteristic* newValue, uint8_t size)
     while((EOT == false) && (iterator < tranNumber))
     {
       valueString = newValue->readValue();
-      debugLED();
       if(valueString == "")
       {
         Serial.println("I recieved an End of Transmission before I thought I would!");
@@ -299,6 +301,26 @@ void readCharecteristic(BLERemoteCharacteristic* newValue, uint8_t size)
     valueString = newValue->readValue();
     //printStringAsBytes(valueString, false);
     Serial.println(valueString.c_str());
+    Serial2.println(valueString.c_str());
+  }
+}
+
+void checkForCommands()
+{
+  int incomingByte = 0; // incoming byte from serial input
+  char c;
+  String output = "";
+
+  while (Serial.available() > 0) 
+  {
+    incomingByte = Serial.read();
+    c = (char) incomingByte;
+    Serial.print(c);
+    output += c; 
+  }
+  if(output != "")
+  {
+    interpretCommand(output.c_str());
   }
 }
 
@@ -317,7 +339,6 @@ void checkInbox()
     Serial.print("Read Time: ");
     Serial.println(millis() - t);
     messageReadWaitlist.pop();
-    debugLED();
   }
 }
 
@@ -337,8 +358,6 @@ void loop() {
     Serial.println("!!!!!!!!!!!!!!!!!!!!!!!!");
   }
 
-  Serial.print("numConnected: ");
-  Serial.println(numConnected);
   if (numConnected > 0) {
     //Serial.println("There is a device connected");
     checkInbox();
@@ -349,22 +368,6 @@ void loop() {
     numConnected = 0;
   }
 
-  //digitalWrite(TESTPIN, LOW);
-
-    int incomingByte = 0; // incoming byte from serial input
-    char c;
-    String output = "";
-    while (Serial.available() > 0) 
-  {
-    incomingByte = Serial.read();
-    c = (char) incomingByte;
-    Serial.print(c);
-    output += c; 
-  }
-  if(output != "")
-  {
-    interpretCommand(output.c_str());
-  }
-
+  checkForCommands();
   delay(120);
 }

@@ -9,10 +9,13 @@
 
 #define TRANSMISSION_SIZE 500
 
+#define RXD2 16
+#define TXD2 17
+
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-std::string   TEST_SERVICE_UUID =  "24c2317b-e845-4cbc-bb4c-fbb93e51f72e";
+std::string  TEST_SERVICE_UUID =  "24c2317b-e845-4cbc-bb4c-fbb93e51f72e";
 std::string  TEST_CHAR_1        =  "770294ed-f345-4f8b-bf3e-063b52d314ab";
 
 std::map<std::string, BLECharacteristic*> charMap;
@@ -94,6 +97,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
             pCharacteristic->setValue(output);
          }
          Serial.println("You are BLETEST! Nothing special is going to happen!");
+         //Large Data support will be re-added... someday
          /*if(currentLocation == -1)
          {
            pCharacteristic->setValue("");
@@ -188,11 +192,12 @@ void interpretCommand(std::string input)
       {
         readWriteNotif(UUID.c_str(), payload);
         sendNotify(out);
-        
       }
+      Serial2.println("[Complete]");
     }
     else
     {
+      Serial2.println("[Invalid Syntax]");
       Serial.println("Improper Syntax!");
     }
   }
@@ -203,24 +208,32 @@ void interpretCommand(std::string input)
     if(out != NULL)
     {
     	//TODO: Need check to see if data needs the largeDataFunction
-    	Serial.println(out->getValue().c_str());
+      std::string outputString = out->getValue();
+    	Serial.println(outputString.c_str());
+      Serial2.println(outputString.c_str());
     }
     else
     {
+      Serial2.println("[Invalid Syntax]");
       Serial.println("Improper Syntax!");
     }
   }
 }
 
-
+//Initilizes UART between PC -> ESP
+//and between ESP -> MCU
+void init_UART()
+{
+  Serial.begin(115200);   
+  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial.println("Serial Txd is on pin: "+String(TX));
+  Serial.println("Serial Rxd is on pin: "+String(RX));
+}
 
 void setup()
 {
-  Serial.begin(115200);                                                         // Initialize serial port
-  Serial.println("Starting BLE work!");
-
-  pinMode(latPin, OUTPUT);
-
+  init_UART();
+  Serial.println("Payload");
   BLEDevice::init(payloadName.c_str());                                                      // Initialize the BLE device
   BLEDevice::setPower(ESP_PWR_LVL_N14);
   BLEServer *pServer = BLEDevice::createServer();                               // Save the BLE device server
@@ -246,14 +259,12 @@ void setup()
 
   pTestService->start();                                                            // Start service
 
-  //pBestService->start();   
   
   pServer->setCallbacks(new MyServerCallbacks());                               // Set server callbacks
   
   //Advertising
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();                   // Grab advertisiing service
   pAdvertising->addServiceUUID(TEST_SERVICE_UUID);   
-  // pAdvertising->addServiceUUID(BEST_SERVICE_UUID);  
   pAdvertising->setScanResponse(true);                                          
   pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
@@ -271,6 +282,25 @@ int isNotZero(int num)
   return 1;
 }
 
+void checkForCommands()
+{
+  int incomingByte = 0; // incoming byte from serial input
+  char c;
+  String output = "";
+
+  while (Serial2.available() > 0) 
+  {
+    incomingByte = Serial2.read();
+    c = (char) incomingByte;
+    Serial.print(c);
+    output += c; 
+  }
+  if(output != "")
+  {
+    interpretCommand(output.c_str());
+  }
+}
+
 void sendLargeData(BLECharacteristic* chr, uint8_t *image_p, int len)
 {
   Serial.println("Configuring Large Data");
@@ -284,7 +314,7 @@ void sendLargeData(BLECharacteristic* chr, uint8_t *image_p, int len)
 
 void loop() {
   if (deviceConnected) {
-     Serial.println("Wow, I am connected!");
+     //Serial.println("Wow, I am connected!");
      //Serial.println("Sending Notification!");
 
      //sendLargeData(pTestChar_1, image_p, iLen_int);
@@ -294,22 +324,6 @@ void loop() {
      Serial.print(BLEDevice::getAddress().toString().c_str());
      Serial.println(" Device is not Connected");
   } 
-
-  int incomingByte = 0; // incoming byte from serial input
-  char c;
-  String output = "";
-
-  while (Serial.available() > 0) 
-  {
-    incomingByte = Serial.read();
-    c = (char) incomingByte;
-    Serial.print(c);
-    output += c; 
-  }
-  if(output != "")
-  {
-  	interpretCommand(output.c_str());
-  }
-
+  checkForCommands();
   delay(120);
 }
