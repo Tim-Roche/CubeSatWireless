@@ -4,6 +4,7 @@
 #include "BLEDevice.h"
 #include <stack>
 #include "charStruct.h"
+#include "parser.h" //For parsing functions, its really small right now but it should grow in the future
 //Device Configuration
 static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
 static BLEAddress deviceAddr2 = BLEAddress("cc:50:e3:a8:40:fe");
@@ -26,14 +27,9 @@ byte REGNOTIF = 0x01;
 byte MEGADATA = 0x02;
 std::map<std::string, charStruct> charMap; //Current handles notification registration
 std::stack <BLEAdvertisedDevice*> connectionWaitlist; 
-//std::stack <BLERemoteCharacteristic*> messageReadWaitlist; 
 std::stack < std::pair<BLERemoteCharacteristic*,uint8_t > > messageReadWaitlist;
 
-boolean newMail = false;
-
 boolean photoTran = false;
-
-BLERemoteCharacteristic* newRemoteChar;
 
 int numConnected = 0;
 
@@ -147,6 +143,53 @@ void initLatency()
 {
   pinMode(TESTPIN, OUTPUT);
   digitalWrite(TESTPIN, LOW);
+}
+
+
+void interpretCommand(std::string input)
+{
+  std::string modifier = getValue(input, ' ', 0);
+  std::string  UUID    = getValue(input, ' ', 1);
+  std::string  payload   = getValue(input, ' ' , 2, true); //guard = true, allows for spaces in data
+  Serial.print("Modifier: ");
+  Serial.println(modifier.c_str());
+  Serial.print("UUID: ");
+  Serial.println(UUID.c_str());
+  Serial.print("Payload: ");
+  Serial.println(payload.c_str());
+
+
+
+  /*if(modifier == "Show")
+  {
+
+  }
+  if(modifier == "Connect")
+  {
+    //Insert into Charmap
+    //Autodiscover
+  }*/
+
+  if (charMap.find(UUID) == charMap.end())
+  {
+    Serial.println("Cannot find in char map!");
+    return;
+  }
+  charStruct out = charMap[UUID];
+  BLERemoteCharacteristic* bleChar = out.getCharecteristic();
+  if (modifier == "Update")
+  {
+    //Impliment Large Data support
+     bleChar->writeValue(payload); 
+     Serial.println("Update Complete!");
+  }
+  if (modifier == "Read")
+  {
+      int size = 0; //This is temporary until I impliment large data support again
+      readCharecteristic(bleChar, size);
+      Serial.println("Read Complete!");
+  }
+
 }
 
 void setup() 
@@ -296,7 +339,7 @@ void loop() {
   Serial.print("numConnected: ");
   Serial.println(numConnected);
   if (numConnected > 0) {
-    Serial.println("There is a device connected");
+    //Serial.println("There is a device connected");
     checkInbox();
   }
   else
@@ -305,6 +348,22 @@ void loop() {
     numConnected = 0;
   }
 
-  digitalWrite(TESTPIN, LOW);
-  delay(500); // Delay a second between loops.
+  //digitalWrite(TESTPIN, LOW);
+
+    int incomingByte = 0; // incoming byte from serial input
+    char c;
+    String output = "";
+    while (Serial.available() > 0) 
+  {
+    incomingByte = Serial.read();
+    c = (char) incomingByte;
+    Serial.print(c);
+    output += c; 
+  }
+  if(output != "")
+  {
+    interpretCommand(output.c_str());
+  }
+
+  delay(120);
 }
