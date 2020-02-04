@@ -3,12 +3,15 @@
 
 class charStruct {
 public: 
+  charStruct();
 	charStruct(BLERemoteCharacteristic* charecteristic);
+	charStruct(uint8_t settings);
 	
 
-	BLERemoteCharacteristic* getChar();
+	BLERemoteCharacteristic* getCharecteristic();
 	uint8_t getSettings();
-
+  void setCharecteristic(BLERemoteCharacteristic* charecteristic);
+  
 	void setSettings(uint8_t settings);
 
 private:

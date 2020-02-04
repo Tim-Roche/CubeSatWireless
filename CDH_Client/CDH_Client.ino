@@ -10,8 +10,6 @@ static BLEAddress deviceAddr2 = BLEAddress("cc:50:e3:a8:40:fe");
 static BLEAddress deviceAddr3 = BLEAddress("a4:cf:12:1e:48:fa"); 
 static BLEAddress deviceAddr4 = BLEAddress("3c:71:bf:71:00:36");
 
-static BLERemoteCharacteristic* pGryoChar_1;
-
 //Globals
 static boolean doConnect = false;
 
@@ -26,7 +24,7 @@ int TESTPIN = 4;
 //Characteristic Map
 byte REGNOTIF = 0x01;
 byte MEGADATA = 0x02;
-std::map<std::string, byte> charMap; //Current handles notification registration
+std::map<std::string, charStruct> charMap; //Current handles notification registration
 std::stack <BLEAdvertisedDevice*> connectionWaitlist; 
 //std::stack <BLERemoteCharacteristic*> messageReadWaitlist; 
 std::stack < std::pair<BLERemoteCharacteristic*,uint8_t > > messageReadWaitlist;
@@ -86,7 +84,7 @@ bool connectToServer(BLEAdvertisedDevice* myDevice) {
 void autoDiscover(BLEClient* pClient, bool subscribe)
 {
   Serial.println("Avaliable Services:");
-  std::map<std::string, byte>::iterator subMapItr; //Iterator for hashmap for auto register
+  std::map<std::string, charStruct>::iterator subMapItr; //Iterator for hashmap for auto register
  
   std::map<std::string, BLERemoteService*>* services = pClient->getServices();
   std::map<std::string, BLERemoteService*>::iterator itr;
@@ -110,7 +108,7 @@ void autoDiscover(BLEClient* pClient, bool subscribe)
 
         for (subMapItr = charMap.begin(); subMapItr != charMap.end(); ++subMapItr)
         {
-            if((BLEUUID(subMapItr->first).equals(charItr->second->getUUID())) && ((subMapItr->second)&REGNOTIF != 0))
+            if((BLEUUID(subMapItr->first).equals(charItr->second->getUUID())) && ((subMapItr->second.getSettings())&REGNOTIF != 0))
              {
               BLERemoteCharacteristic* selected_BLERemoteChar = charItr->second;
               selected_BLERemoteChar->registerForNotify(notifyCallback);
@@ -158,12 +156,12 @@ void setup()
   //User Charecteristic Registration Requirements
   //Eventually there will be a way for user to enter what they want charecteristics they want to register for
   //For now its hard coded. Deal with it.
-  charMap.insert(std::pair<std::string,byte>("f9fd0006-71ae-42c4-bd19-9d5e37ebf073",REGNOTIF));
-  charMap.insert(std::pair<std::string,byte>("f9fd0016-71ae-42c4-bd19-9d5e37ebf073",REGNOTIF));
-  charMap.insert(std::pair<std::string,byte>("f9fd0017-71ae-42c4-bd19-9d5e37ebf073",REGNOTIF));
+  charMap.insert(std::pair<std::string,charStruct>("f9fd0006-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF)));
+  charMap.insert(std::pair<std::string,charStruct>("f9fd0016-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF)));
+  charMap.insert(std::pair<std::string,charStruct>("f9fd0017-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF)));
 
   //charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF|MEGADATA));
-  charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF));
+  charMap.insert(std::pair<std::string,charStruct>("770294ed-f345-4f8b-bf3e-063b52d314ab",charStruct(REGNOTIF)));
   
   BLEDevice::init("test");
   BLEDevice::setPower(ESP_PWR_LVL_N14);
@@ -202,17 +200,17 @@ void printStringAsBytes(std::string value, bool verb)
   Serial.println();
 }
 
-byte searchCharMap(BLERemoteCharacteristic* newValue)
+charStruct* searchCharMap(BLERemoteCharacteristic* newValue)
 {
-  std::map<std::string, byte>::iterator subMapItr; //Iterator for hashmap for auto register
+  std::map<std::string, charStruct>::iterator subMapItr; //Iterator for hashmap for auto register
   for (subMapItr = charMap.begin(); subMapItr != charMap.end(); ++subMapItr)
   {
       if(BLEUUID(subMapItr->first).equals(newValue->getUUID()))
        {
-          return(subMapItr->second);
+          return(&(subMapItr->second));
        }
   }
-  return(0x00);
+  return(NULL);
 }
 
 //Eventually will return something, for now just prints out the value
@@ -222,7 +220,7 @@ void readCharecteristic(BLERemoteCharacteristic* newValue, uint8_t size)
   std::string valueString;
   //BLERemoteCharacteristic* newValue = valuePair.first;
   //uint8_t message = valuePair.second;
-  byte flags = searchCharMap(newValue);
+  byte flags = searchCharMap(newValue) -> getSettings();
   Serial.println(size);
   Serial.println(flags);
   if((size != 0) && (flags&MEGADATA != 0))
