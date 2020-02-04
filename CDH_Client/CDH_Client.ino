@@ -97,28 +97,29 @@ void autoDiscover(BLEClient* pClient, bool subscribe)
     std::map<std::string, BLERemoteCharacteristic*>::iterator charItr;
     for (charItr = character->begin(); charItr != character->end(); ++charItr)
     {
-      selected_char = charItr->first; //Grab the selected charecteristic UUID in string form
+      //selected_char = charItr->first; //Grab the selected charecteristic UUID in string form
       Serial.print("---");
       Serial.println((charItr->first).c_str());
-      //Notification Registration if selected
-      if(subscribe)
-      {
-        //subMapItr = charMap.find(selected_char);
-        //if ((subMapItr != charMap.end()) && ((subMapItr->second)&REGNOTIF != 0))
 
+
+      //Sets BLERemoteCharecteristics and enables notifications if set when function was called
         for (subMapItr = charMap.begin(); subMapItr != charMap.end(); ++subMapItr)
         {
-            if((BLEUUID(subMapItr->first).equals(charItr->second->getUUID())) && ((subMapItr->second.getSettings())&REGNOTIF != 0))
-             {
-              BLERemoteCharacteristic* selected_BLERemoteChar = charItr->second;
-              selected_BLERemoteChar->registerForNotify(notifyCallback);
-              Serial.println("--- Found in hashmap, registered for notifications!");
-             }
+            if((BLEUUID(subMapItr->first).equals(charItr->second->getUUID()))) 
+            {
+                BLERemoteCharacteristic* selected_BLERemoteChar = charItr->second;
+                subMapItr->second.setCharecteristic(selected_BLERemoteChar);
+                if((subscribe) && ((subMapItr->second.getSettings())& REGNOTIF != 0))
+                 {
+                    selected_BLERemoteChar->registerForNotify(notifyCallback);
+                    Serial.println("--- Found in hashmap, registered for notifications!");
+                 }
+            }
+
         }
       }
     }
-  }
-}; 
+  } 
 
 
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
@@ -160,7 +161,6 @@ void setup()
   charMap.insert(std::pair<std::string,charStruct>("f9fd0016-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF)));
   charMap.insert(std::pair<std::string,charStruct>("f9fd0017-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF)));
 
-  //charMap.insert(std::pair<std::string,byte>("770294ed-f345-4f8b-bf3e-063b52d314ab",REGNOTIF|MEGADATA));
   charMap.insert(std::pair<std::string,charStruct>("770294ed-f345-4f8b-bf3e-063b52d314ab",charStruct(REGNOTIF)));
   
   BLEDevice::init("test");
