@@ -311,9 +311,9 @@ void checkForCommands()
   char c;
   String output = "";
 
-  while (Serial.available() > 0) 
+  while (Serial2.available() > 0) 
   {
-    incomingByte = Serial.read();
+    incomingByte = Serial2.read();
     c = (char) incomingByte;
     Serial.print(c);
     output += c; 
