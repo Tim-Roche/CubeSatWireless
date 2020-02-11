@@ -67,8 +67,6 @@ class MyClientCallback : public BLEClientCallbacks {
   }
 };
 
-
-
 void autoDiscover(BLEClient* pClient, bool subscribe)
 {
   Serial.println("Avaliable Services:");
@@ -210,9 +208,10 @@ void setup()
   //For now its hard coded. Deal with it.
   charMap.insert(std::pair<std::string,charStruct>("f9fd0006-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF)));
   charMap.insert(std::pair<std::string,charStruct>("f9fd0016-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF)));
-  charMap.insert(std::pair<std::string,charStruct>("f9fd0017-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF)));
 
+  //Analogue Dudes
   charMap.insert(std::pair<std::string,charStruct>("770294ed-f345-4f8b-bf3e-063b52d314ab",charStruct(REGNOTIF)));
+  charMap.insert(std::pair<std::string,charStruct>("5276084c-0f40-4e15-be7f-9ba118ccfdd9",charStruct(REGNOTIF)));
   
   BLEDevice::init("CDH");
   BLEDevice::setPower(ESP_PWR_LVL_N14);
