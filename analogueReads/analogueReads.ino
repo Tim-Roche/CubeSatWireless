@@ -1,4 +1,4 @@
-int tempPin =  34; // potentiometer wiper (middle terminal) connected to analog pin 3
+vint tempPin =  34; // potentiometer wiper (middle terminal) connected to analog pin 3
 int lightPin = 35;
 int lightReading;
 int tempReading;
