@@ -7,21 +7,33 @@ charStruct::charStruct()
   m_settings = 0x00;
 }
 
-charStruct::charStruct(BLERemoteCharacteristic* charecteristic)
+charStruct::charStruct(BLERemoteCharacteristic* charecteristic, std::string UUID = "")
 {
 	m_charecteristic = charecteristic;
 	m_settings = 0x00;
+  m_UUID = UUID;
 }
 
-charStruct::charStruct(uint8_t settings)
+charStruct::charStruct(uint8_t settings, std::string UUID="")
 {
 	m_settings = settings;
+  m_UUID = UUID;
 }
-
 
 BLERemoteCharacteristic* charStruct::getCharecteristic()
 {
 	return(m_charecteristic);
+}
+
+
+std::string charStruct::getUUID()
+{
+  return(m_UUID);
+}
+  
+void charStruct::setUUID(std::string UUID)
+{
+  m_UUID = UUID;
 }
 
 uint8_t charStruct::getSettings()

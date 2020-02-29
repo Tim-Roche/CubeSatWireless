@@ -93,7 +93,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       
       if(hit.equals(BLETEMP))
       {
-      	 Serial.println("BLE TEMP!");
+         Serial.println("BLE TEMP!");
          std::string output = readWriteNotif(TEMP_CHAR);
          notifMap.erase(TEMP_CHAR);
          if(output != "")
@@ -103,7 +103,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       }
       if(hit.equals(BLELIGHT))
       {
-      	 Serial.println("BLE LIGHT!");
+         Serial.println("BLE LIGHT!");
          std::string output = readWriteNotif(LIGHT_CHAR);
          notifMap.erase(LIGHT_CHAR);
          if(output != "")
@@ -168,15 +168,15 @@ void interpretCommand(std::string input)
   Serial.println(payload.c_str());
   if ((modifier == "Update") || (modifier == "UpdateN"))
   {
-  	Serial.println("Update");
-  	//Update Value
-  	//Search Char Map for UUID conversion
-  	//Update UUID with payload
+    Serial.println("Update");
+    //Update Value
+    //Search Char Map for UUID conversion
+    //Update UUID with payload
     BLECharacteristic* out = searchCharMap(UUID.c_str());
     if(out != NULL)
     {
-    	//TODO: Need check to see if data needs the largeDataFunction
-    	out->setValue(payload); 
+      //TODO: Need check to see if data needs the largeDataFunction
+      out->setValue(payload); 
       if(modifier == "UpdateN")
       {
         readWriteNotif(UUID.c_str(), payload);
@@ -192,11 +192,11 @@ void interpretCommand(std::string input)
   }
   if (modifier == "Read")
   {
-  	Serial.println("Read");
+    Serial.println("Read");
     BLECharacteristic* out = searchCharMap(UUID.c_str());
     if(out != NULL)
     {
-    	//TODO: Need check to see if data needs the largeDataFunction
+      //TODO: Need check to see if data needs the largeDataFunction
       std::string outputString = out->getValue();
       Serial.println(outputString.c_str());
       Serial2.println(outputString.c_str());
@@ -206,6 +206,10 @@ void interpretCommand(std::string input)
       Serial2.println("[Invalid Syntax]");
       Serial.println("Improper Syntax!");
     }
+  }
+  if(modifier == "Echo")
+  {
+    Serial2.println(UUID.c_str());
   }
 }
 

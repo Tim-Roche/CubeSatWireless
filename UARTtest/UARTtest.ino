@@ -10,15 +10,23 @@
 #define RXD2 16
 #define TXD2 17
 
+int latPin = 22;
 
-void setup() {
-  // Note the format for setting a serial port is as follows: Serial2.begin(baud-rate, protocol, RX pin, TX pin);
+void setup()
+{
+  //Serial.println("Serial Rxd is on pin: "+String(RX));
   Serial.begin(115200);
   //Serial1.begin(9600, SERIAL_8N1, RXD2, TXD2);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
-  //Serial.println("Serial Txd is on pin: "+String(TX));
-  //Serial.println("Serial Rxd is on pin: "+String(RX));
   Serial.println("ESP32 Command Tester for CubeSatWireless");
+  pinMode(latPin, OUTPUT);
+  Serial.println("Test Square Begins");
+  digitalWrite(latPin, 1);
+  delay(1000);
+  digitalWrite(latPin, 0);
+  delay(500);
+  Serial.println("Test Square Ends");
+  
 }
 
 
@@ -54,8 +62,12 @@ void loop() { //Choose Serial1 or Serial2 as required
   }
   if(output != "")
   {
+    digitalWrite(latPin, 1);
     Serial.print("Recieved: ");
     Serial.println(output);
+    delay(250);
+    digitalWrite(latPin, 0);
+    Serial.println("Pin Turned Off!");
   }
   delay(50);
 }

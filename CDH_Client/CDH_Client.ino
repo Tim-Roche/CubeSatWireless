@@ -6,17 +6,20 @@
 #include "charStruct.h"
 #include "parser.h" //For parsing functions, its really small right now but it should grow in the future
 #include <string>
-
+  
 //UART COMMS
 #define RXD2 16
 #define TXD2 17
+
+//Latency Testing
+int latPin = 36;
 
 //Device Configuration
 static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
 static BLEAddress deviceAddr2 = BLEAddress("cc:50:e3:a8:40:fe");
 static BLEAddress deviceAddr3 = BLEAddress("a4:cf:12:1e:48:fa"); 
 static BLEAddress deviceAddr4 = BLEAddress("3c:71:bf:71:00:36");
-
+  
 //Globals
 static boolean doConnect = false;
 
@@ -66,6 +69,27 @@ class MyClientCallback : public BLEClientCallbacks {
     Serial.println(numConnected);
   }
 };
+
+void printStringAsBytes(std::string value, bool verb)
+{
+  //Serial.println(value.c_str());
+  int len = value.length();
+  if(verb)
+  {
+    Serial.print("The len is: ");
+    Serial.println(len);
+  }
+
+  for(int i = 0; i < len; i++)
+  {
+    Serial.print((uint8_t)value[i]);
+    if(i+1 != len)
+    {
+      Serial.print(",");
+    }
+  }
+  Serial.println();
+}
 
 void autoDiscover(BLEClient* pClient, bool subscribe)
 {
@@ -142,110 +166,6 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
   } 
 }; 
 
-
-void interpretCommand(std::string input)
-{
-  std::string modifier = getValue(input, ' ', 0);
-  std::string  UUID    = getValue(input, ' ', 1); // "770294ed-f345-4f8b-bf3e-063b52d314ab";
-  std::string  payload   = getValue(input, ' ' , 2, true); //guard = true, allows for spaces in data
-  Serial.print("Modifier: ");
-  Serial.println(modifier.c_str());
-  Serial.print("UUID: ");
-  Serial.println(UUID.c_str());
-  Serial.print("Payload: ");
-  Serial.println(payload.c_str());
-
-  /*if(modifier == "Show")
-  {
-
-  }
-  if(modifier == "Connect")
-  {
-    //Insert into Charmap
-    //Autodiscover
-  }*/
-  std::map<std::string, charStruct>::iterator it;
-  it = charMap.find(UUID);
-  if (it == charMap.end())
-  {
-    Serial.println("Cannot find in char map!");
-    return;
-  }
-  charStruct out = it->second;
-  BLERemoteCharacteristic* bleChar = out.getCharecteristic();
-  if (modifier == "Update")
-  {
-    //Impliment Large Data support
-     bleChar->writeValue(payload); 
-     Serial.println("Update Complete!");
-     Serial2.println("[Completed]");
-  }
-  if (modifier == "Read")
-  {
-      int size = 0; //This is temporary until I impliment large data support again
-      readCharecteristic(bleChar, size);
-      Serial.println("Read Complete!");
-  }
-
-}
-
-//Initilizes UART between PC -> ESP
-//and between ESP -> MCU
-void init_UART()
-{
-  Serial.begin(115200);   
-  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
-  Serial.println("Serial Txd is on pin: "+String(TX));
-  Serial.println("Serial Rxd is on pin: "+String(RX));
-}
-
-void setup() 
-{  
-  init_UART();
-  Serial.println("CDH");
-  //User Charecteristic Registration Requirements
-  //Eventually there will be a way for user to enter what they want charecteristics they want to register for
-  //For now its hard coded. Deal with it.
-  charMap.insert(std::pair<std::string,charStruct>("f9fd0006-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF)));
-  charMap.insert(std::pair<std::string,charStruct>("f9fd0016-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF)));
-
-  //Analogue Dudes
-  charMap.insert(std::pair<std::string,charStruct>("770294ed-f345-4f8b-bf3e-063b52d314ab",charStruct(REGNOTIF)));
-  charMap.insert(std::pair<std::string,charStruct>("5276084c-0f40-4e15-be7f-9ba118ccfdd9",charStruct(REGNOTIF)));
-  
-  BLEDevice::init("CDH");
-  BLEDevice::setPower(ESP_PWR_LVL_N14);
-  BLEScan* pBLEScan = BLEDevice::getScan();
-  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-  pBLEScan->setInterval(1349);
-  pBLEScan->setWindow(449);
-  pBLEScan->setActiveScan(true);
-  pBLEScan->start(5, false);
-} 
-
-
-
-void printStringAsBytes(std::string value, bool verb)
-{
-  //Serial.println(value.c_str());
-  int len = value.length();
-  if(verb)
-  {
-    Serial.print("The len is: ");
-    Serial.println(len);
-  }
-
-  for(int i = 0; i < len; i++)
-  {
-    Serial.print((uint8_t)value[i]);
-    if(i+1 != len)
-    {
-      Serial.print(",");
-    }
-  }
-  Serial.println();
-}
-
 charStruct* searchCharMap(BLERemoteCharacteristic* newValue)
 {
   std::map<std::string, charStruct>::iterator subMapItr; //Iterator for hashmap for auto register
@@ -259,7 +179,6 @@ charStruct* searchCharMap(BLERemoteCharacteristic* newValue)
   return(NULL);
 }
 
-
 //Eventually will return something, for now just prints out the value
 void readCharecteristic(BLERemoteCharacteristic* newValue, uint8_t size)
 {
@@ -267,7 +186,9 @@ void readCharecteristic(BLERemoteCharacteristic* newValue, uint8_t size)
   std::string valueString;
   //BLERemoteCharacteristic* newValue = valuePair.first;
   //uint8_t message = valuePair.second;
-  byte flags = searchCharMap(newValue) -> getSettings();
+  charStruct* input = searchCharMap(newValue);
+  byte flags =  input-> getSettings();
+  std::string UUID = input->getUUID();
   Serial.println(size);
   Serial.println(flags);
   if((size != 0) && (flags&MEGADATA != 0))
@@ -300,9 +221,100 @@ void readCharecteristic(BLERemoteCharacteristic* newValue, uint8_t size)
     valueString = newValue->readValue();
     //printStringAsBytes(valueString, false);
     Serial.println(valueString.c_str());
+    Serial2.print(UUID.c_str());
+    Serial2.print(" ");
     Serial2.println(valueString.c_str());
   }
 }
+
+void interpretCommand(std::string input)
+{
+  std::string modifier = getValue(input, ' ', 0);
+  std::string  UUID    = getValue(input, ' ', 1); // "770294ed-f345-4f8b-bf3e-063b52d314ab";
+  std::string  payload   = getValue(input, ' ' , 2, true); //guard = true, allows for spaces in data
+  Serial.print("Modifier: ");
+  Serial.println(modifier.c_str());
+  Serial.print("UUID: ");
+  Serial.println(UUID.c_str());
+  Serial.print("Payload: ");
+  Serial.println(payload.c_str());
+
+  if (modifier == "Check")
+  {
+    if (UUID == "Connected")
+    {
+        Serial2.println(numConnected);
+        Serial2.println("[Completed]");
+        Serial.println("Read Complete!");
+    }
+    return;
+  }
+
+  std::map<std::string, charStruct>::iterator it;
+  it = charMap.find(UUID);
+  if (it == charMap.end())
+  {
+    Serial.println("Cannot find in char map!");
+    return;
+  }
+  charStruct out = it->second;
+  BLERemoteCharacteristic* bleChar = out.getCharecteristic();
+  if (modifier == "Update")
+  {
+    //Impliment Large Data support
+     bleChar->writeValue(payload); 
+     Serial.println("Update Complete!");
+     Serial2.println("[Completed]");
+  }
+  if (modifier == "Read")
+  {
+      int size = 0; //This is temporary until I impliment large data support again
+      readCharecteristic(bleChar, size);
+      Serial.println("Read Complete!");
+  }
+
+}
+
+
+//Initilizes UART between PC -> ESP
+//and between ESP -> MCU
+void init_UART()
+{
+  Serial.begin(115200);   
+  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial.println("Serial Txd is on pin: "+String(TX));
+  Serial.println("Serial Rxd is on pin: "+String(RX));
+}
+
+void setup() 
+{  
+  init_UART();
+  
+  //Latency Testing Initialization
+  pinMode(latPin, OUTPUT);
+  digitalWrite(latPin, 0);
+  ///////////////
+  
+  Serial.println("CDH");
+  //User Charecteristic Registration Requirements
+  //Eventually there will be a way for user to enter what they want charecteristics they want to register for
+  //For now its hard coded. Deal with it.
+  charMap.insert(std::pair<std::string,charStruct>("f9fd0006-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF, "f9fd0006-71ae-42c4-bd19-9d5e37ebf073")));
+  charMap.insert(std::pair<std::string,charStruct>("f9fd0016-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF, "f9fd0016-71ae-42c4-bd19-9d5e37ebf073")));
+
+  //Analogue Dudes
+  charMap.insert(std::pair<std::string,charStruct>("770294ed-f345-4f8b-bf3e-063b52d314ab",charStruct(REGNOTIF, "770294ed-f345-4f8b-bf3e-063b52d314ab")));
+  charMap.insert(std::pair<std::string,charStruct>("5276084c-0f40-4e15-be7f-9ba118ccfdd9",charStruct(REGNOTIF, "5276084c-0f40-4e15-be7f-9ba118ccfdd9")));
+  
+  BLEDevice::init("CDH");
+  BLEDevice::setPower(ESP_PWR_LVL_N14);
+  BLEScan* pBLEScan = BLEDevice::getScan();
+  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+  pBLEScan->setInterval(1349);
+  pBLEScan->setWindow(449);
+  pBLEScan->setActiveScan(true);
+  pBLEScan->start(5, false);
+} 
 
 void checkForCommands()
 {
@@ -327,7 +339,6 @@ void checkInbox()
 {
   if(messageReadWaitlist.size() != 0)
   {
-    
     Serial.print("New Message in Inbox! Messages Unread: ");
     Serial.println(messageReadWaitlist.size());
     std::pair<BLERemoteCharacteristic*,uint8_t> notifyPair = messageReadWaitlist.top();
