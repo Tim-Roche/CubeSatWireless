@@ -1,7 +1,7 @@
 clear all
 clc
 disp("Reading....");
-m = readtable("madeUp.csv");
+m = readtable("LatTest1.csv");
 m = table2array(m);
 disp("Done!");
 
@@ -26,4 +26,7 @@ end
 deltas = deltas';
 
 disp("Total Amount: "+ length(deltas));
+disp("Average: " + mean(deltas));
+disp("Max: " + max(deltas));
+disp("Min: " + min(deltas));
 
