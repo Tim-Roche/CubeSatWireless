@@ -43,12 +43,12 @@ int numConnected = 0;
 static void notifyCallback(
   BLERemoteCharacteristic* pBLERemoteCharacteristic,uint8_t* pData,size_t length,bool isNotify) 
   {
-    Serial.println("***********************");
+    /*Serial.println("***********************");
     Serial.print("Notify callback for characteristic ");
     Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
     Serial.println(*pData);
     Serial.print(" of data length ");
-    Serial.println(length);
+    Serial.println(length);*/
     messageReadWaitlist.push( std::pair<BLERemoteCharacteristic*, uint8_t>(pBLERemoteCharacteristic, *pData));
 }
 
