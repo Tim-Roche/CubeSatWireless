@@ -40,7 +40,7 @@ void loop() { //Choose Serial1 or Serial2 as required
   {
     incomingByte = Serial.read();
     c = (char) incomingByte;
-    Serial.print(c);
+    //Serial.print(c);
     output += c; 
   }
   if(output.charAt(0) == 'T')
@@ -51,8 +51,8 @@ void loop() { //Choose Serial1 or Serial2 as required
       Serial2.print(command);
       Serial2.print(tempReading);
       Serial2.print(" ");
-      Serial.print(command);
-      Serial.print(tempReading);
+      //Serial.print(command);
+      //Serial.print(tempReading);
       delay(500);
       digitalWrite(latPin, 0);
   }
@@ -64,8 +64,8 @@ void loop() { //Choose Serial1 or Serial2 as required
       Serial2.print(command);
       Serial2.print(lightReading);
       Serial2.print(" ");
-      Serial.print(command);
-      Serial.println(lightReading);
+      //Serial.print(command);
+      //Serial.println(lightReading);
       delay(500);
       digitalWrite(latPin, 0);
   }
@@ -84,8 +84,8 @@ void loop() { //Choose Serial1 or Serial2 as required
   if(output != "")
   {
     digitalWrite(1, latPin);
-    Serial.print("Recieved: ");
-    Serial.println(output);
+    //Serial.print("Recieved: ");
+    //Serial.println(output);
     digitalWrite(0, latPin);
   }
   delay(50);
