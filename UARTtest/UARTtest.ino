@@ -20,12 +20,12 @@ void setup()
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   Serial.println("ESP32 Command Tester for CubeSatWireless");
   pinMode(latPin, OUTPUT);
-  Serial.println("Test Square Begins");
+ /* Serial.println("Test Square Begins");
   digitalWrite(latPin, 1);
   delay(1000);
   digitalWrite(latPin, 0);
   delay(500);
-  Serial.println("Test Square Ends");
+  Serial.println("Test Square Ends"); */
   
 }
 
@@ -39,7 +39,7 @@ void loop() { //Choose Serial1 or Serial2 as required
   {
     incomingByte = Serial.read();
     c = (char) incomingByte;
-    Serial.print(c);
+    //Serial.print(c);
     output += c; 
   }
   if(output != "")
@@ -63,11 +63,11 @@ void loop() { //Choose Serial1 or Serial2 as required
   if(output != "")
   {
     digitalWrite(latPin, 1);
-    Serial.print("Recieved: ");
-    Serial.println(output);
+    //Serial.print("Recieved: ");
+    //Serial.println(output);
     delay(250);
     digitalWrite(latPin, 0);
-    Serial.println("Pin Turned Off!");
+    //Serial.println("Pin Turned Off!");
   }
   delay(50);
 }
