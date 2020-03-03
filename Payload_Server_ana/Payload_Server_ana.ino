@@ -70,18 +70,8 @@ class MyCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
       std::string uuid = pCharacteristic->getUUID().toString();
       std::string value = pCharacteristic->getValue();
+  }
 
-      if (value.length() > 0) {
-        //Serial.println("*********");
-        //Serial.print("From UUID: ");
-        //Serial.println(uuid.c_str());
-        for (int i = 0; i < value.length(); i++)
-          //Serial.print(value[i]);
-
-        //Serial.println();
-        //Serial.println("*********");
-      }
-    }
 
     void onRead(BLECharacteristic* pCharacteristic) {
       int packetSize = 500;

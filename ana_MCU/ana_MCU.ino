@@ -25,7 +25,7 @@ void setup() {
   //Serial.println("Serial Txd is on pin: "+String(TX));
   //Serial.println("Serial Rxd is on pin: "+String(RX));
   pinMode(latPin, OUTPUT);
-  digitalWrite(latPin, 1);
+  digitalWrite(latPin, 0);
   Serial.println("ESP32 Command Tester for CubeSatWireless");
 }
 
