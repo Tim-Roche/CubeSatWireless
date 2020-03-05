@@ -12,7 +12,7 @@
 #define TXD2 17
 
 //Latency Testing
-int latPin = 36;
+int latPin = 22;
 
 //Device Configuration
 static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
@@ -265,9 +265,11 @@ void interpretCommand(std::string input)
   if (modifier == "Update")
   {
     //Impliment Large Data support
+    digitalWrite(latPin, 1);
      bleChar->writeValue(payload); 
      //Serial.println("Update Complete!");
      Serial2.println("[Completed]");
+    digitalWrite(latPin,0);
   }
   if (modifier == "Read")
   {

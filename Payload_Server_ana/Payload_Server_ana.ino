@@ -28,7 +28,7 @@ uint8_t *image_p = image; //Sets pointer to first element in array
 int currentLocation = 0;
 int largeDataSize = 0;
 
-int latPin = 4;
+int latPin = 22;
 
 BLEServer *pServer = NULL;
 BLECharacteristic* pTestChar_1;
@@ -169,15 +169,17 @@ void interpretCommand(std::string input)
       out->setValue(payload); 
       if(modifier == "UpdateN")
       {
+        digitalWrite(latPin, 1);
         readWriteNotif(UUID.c_str(), payload);
         sendNotify(out);
+        digitalWrite(latPin, 0);
       }
-      //Serial2.println("[Complete]");
+      Serial2.println("[Complete]");
     }
     else
     {
-      //Serial2.println("[Invalid Syntax]");
-      //Serial.println("Improper Syntax!");
+      Serial2.println("[Invalid Syntax]");
+      Serial.println("Improper Syntax!");
     }
   }
   if (modifier == "Read")
@@ -188,18 +190,18 @@ void interpretCommand(std::string input)
     {
       //TODO: Need check to see if data needs the largeDataFunction
       std::string outputString = out->getValue();
-      //Serial.println(outputString.c_str());
-      //Serial2.println(outputString.c_str());
+      Serial.println(outputString.c_str());
+      Serial2.println(outputString.c_str());
     }
     else
     {
-      //Serial2.println("[Invalid Syntax]");
-      //Serial.println("Improper Syntax!");
+      Serial2.println("[Invalid Syntax]");
+      Serial.println("Improper Syntax!");
     }
   }
   if(modifier == "Echo")
   {
-    //Serial2.println(UUID.c_str());
+    Serial2.println(UUID.c_str());
   }
 }
 
@@ -259,6 +261,7 @@ void setup()
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();                                                // Start advertising
   //Serial.println("Setup Complete. We are Advertising!");
+  digitalWrite(latPin, 0);
 }
 
 
