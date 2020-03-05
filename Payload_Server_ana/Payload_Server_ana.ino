@@ -5,19 +5,13 @@
 #include <BLEServer.h>
 #include <BLE2902.h>
 #include <string>
-#include "picturebitmap.h"
-
-#define TRANSMISSION_SIZE 500
+#include "payloadSettings.h"
 
 #define RXD2 16
 #define TXD2 17
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
-
-std::string  SENSOR_SERVICE_UUID = "24c2317b-e845-4cbc-bb4c-fbb93e51f72e";
-std::string  TEMP_CHAR  =  "770294ed-f345-4f8b-bf3e-063b52d314ab";
-std::string  LIGHT_CHAR        =  "5276084c-0f40-4e15-be7f-9ba118ccfdd9";
 
 std::map<std::string, BLECharacteristic*> charMap;
 std::map<std::string, std::string> notifMap;
