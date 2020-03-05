@@ -16,6 +16,7 @@ int tempPin =  32; // potentiometer wiper (middle terminal) connected to analog 
 int lightPin = 35;
 int lightReading;
 int tempReading;
+int count =1;
 
 void setup() {
   // Note the format for setting a serial port is as follows: Serial2.begin(baud-rate, protocol, RX pin, TX pin);
@@ -31,7 +32,7 @@ void setup() {
 
 
 void loop() { //Choose Serial1 or Serial2 as required
-
+  
   int incomingByte = 0; // incoming byte from serial input
   char c;
   String output = "";
@@ -43,8 +44,9 @@ void loop() { //Choose Serial1 or Serial2 as required
     //Serial.print(c);
     output += c; 
   }
-  if(output.charAt(0) == 'T')
+  if((output.charAt(0) == 'T')||(count>1))
   {
+ 
       command = "UpdateN 770294ed-f345-4f8b-bf3e-063b52d314ab ";
       tempReading = analogRead(tempPin);  // read the input pin
       digitalWrite(latPin, 1);
@@ -55,6 +57,8 @@ void loop() { //Choose Serial1 or Serial2 as required
       //Serial.print(tempReading);
       delay(500);
       digitalWrite(latPin, 0);
+      Serial.println(count);
+      count++;
   }
   if(output.charAt(0) == 'L')
   {
