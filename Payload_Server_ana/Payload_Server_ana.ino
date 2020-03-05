@@ -50,11 +50,11 @@ class MyServerCallbacks: public BLEServerCallbacks {
       BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
       pAdvertising->start();
       deviceConnected = true;
-      //Serial.println("I connected!");
+      Serial.println("I connected!");
     };
     
     void onDisconnect(BLEServer* pServer) {
-      //Serial.println("I Disconnected!");
+      Serial.println("I Disconnected!");
       deviceConnected = false;
     }  
 };
@@ -73,11 +73,11 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       BLEUUID BLETEMP = BLEUUID(TEMP_CHAR);
       BLEUUID BLELIGHT= BLEUUID(LIGHT_CHAR);
 
-      ////Serial.println("Someone wants to read my data: ");
+      Serial.println("Someone wants to read my data: ");
       
       if(hit.equals(BLETEMP))
       {
-         //Serial.println("BLE TEMP!");
+         Serial.println("BLE TEMP!");
          std::string output = readWriteNotif(TEMP_CHAR);
          notifMap.erase(TEMP_CHAR);
          if(output != "")
@@ -87,7 +87,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       }
       if(hit.equals(BLELIGHT))
       {
-         //Serial.println("BLE LIGHT!");
+         Serial.println("BLE LIGHT!");
          std::string output = readWriteNotif(LIGHT_CHAR);
          notifMap.erase(LIGHT_CHAR);
          if(output != "")
@@ -131,11 +131,11 @@ std::string getValue(std::string data, char separator, int index, bool guard=fal
 void sendNotify(BLECharacteristic* chr, int notif = 0)
 {
 
-  //Serial.println("Setting Notify Value");
+  Serial.println("Setting Notify Value");
   chr->setValue((uint32_t&)notif); 
 
   chr->notify();
-  //Serial.println("Notification Sent");
+  Serial.println("Notification Sent");
 } 
 
 
@@ -144,15 +144,15 @@ void interpretCommand(std::string input)
   std::string modifier = getValue(input, ' ', 0);
   std::string  UUID    = getValue(input, ' ', 1);
   std::string  payload   = getValue(input, ' ' , 2, true); //guard = true, allows for spaces in data
-  //Serial.print("Modifier: ");
-  //Serial.println(modifier.c_str());
-  //Serial.print("UUID: ");
-  //Serial.println(UUID.c_str());
-  //Serial.print("Payload: ");
-  //Serial.println(payload.c_str());
+  Serial.print("Modifier: ");
+  Serial.println(modifier.c_str());
+  Serial.print("UUID: ");
+  Serial.println(UUID.c_str());
+  Serial.print("Payload: ");
+  Serial.println(payload.c_str());
   if ((modifier == "Update") || (modifier == "UpdateN"))
   {
-    //Serial.println("Update");
+    Serial.println("Update");
     //Update Value
     //Search Char Map for UUID conversion
     //Update UUID with payload
@@ -178,7 +178,7 @@ void interpretCommand(std::string input)
   }
   if (modifier == "Read")
   {
-    //Serial.println("Read");
+    Serial.println("Read");
     BLECharacteristic* out = searchCharMap(UUID.c_str());
     if(out != NULL)
     {
@@ -205,14 +205,14 @@ void init_UART()
 {
   Serial.begin(115200);   
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
-  //Serial.println("Serial Txd is on pin: "+String(TX));
-  //Serial.println("Serial Rxd is on pin: "+String(RX));
+  Serial.println("Serial Txd is on pin: "+String(TX));
+  Serial.println("Serial Rxd is on pin: "+String(RX));
 }
 
 void setup()
 {
   init_UART();
-  //Serial.println("Payload");
+  Serial.println("Payload");
   BLEDevice::init(payloadName.c_str());                                                      // Initialize the BLE device
   BLEDevice::setPower(ESP_PWR_LVL_N14);
   BLEServer *pServer = BLEDevice::createServer();                               // Save the BLE device server
@@ -254,7 +254,7 @@ void setup()
   pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();                                                // Start advertising
-  //Serial.println("Setup Complete. We are Advertising!");
+  Serial.println("Setup Complete. We are Advertising!");
   digitalWrite(latPin, 0);
 }
 
@@ -278,7 +278,7 @@ void checkForCommands()
   {
     incomingByte = Serial2.read();
     c = (char) incomingByte;
-    //Serial.print(c);
+    Serial.print(c);
     output += c; 
   }
   if(output != "")
@@ -289,27 +289,27 @@ void checkForCommands()
 
 void sendLargeData(BLECharacteristic* chr, uint8_t *image_p, int len)
 {
-  //Serial.println("Configuring Large Data");
+  Serial.println("Configuring Large Data");
   currentLocation = 0;
   largeDataSize = len;
   int totalTranmissions = (len/TRANSMISSION_SIZE) + isNotZero(len%TRANSMISSION_SIZE);
-  //Serial.print("Total Transmissions: ");
-  //Serial.println(totalTranmissions);
+  Serial.print("Total Transmissions: ");
+  Serial.println(totalTranmissions);
   sendNotify(chr, totalTranmissions);
 }
 
 void loop() {
   if (deviceConnected) {
-     ////Serial.println("Wow, I am connected!");
-     ////Serial.println("Sending Notification!");
+     Serial.println("Wow, I am connected!");
+     Serial.println("Sending Notification!");
 
      //sendLargeData(pTestChar_1, image_p, iLen_int);
   }
   else
   {
-     //Serial.print(BLEDevice::getAddress().toString().c_str());
-     //Serial.println(" Device is not Connected");
+     Serial.print(BLEDevice::getAddress().toString().c_str());
+     Serial.println(" Device is not Connected");
   } 
   checkForCommands();
-  delay(120);
+  //delay(120);
 }

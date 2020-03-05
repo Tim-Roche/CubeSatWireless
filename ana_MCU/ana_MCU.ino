@@ -21,10 +21,10 @@ int count =1;
 void setup() {
   // Note the format for setting a serial port is as follows: Serial2.begin(baud-rate, protocol, RX pin, TX pin);
   Serial.begin(115200);
-  //Serial1.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial1.begin(9600, SERIAL_8N1, RXD2, TXD2);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
-  //Serial.println("Serial Txd is on pin: "+String(TX));
-  //Serial.println("Serial Rxd is on pin: "+String(RX));
+  Serial.println("Serial Txd is on pin: "+String(TX));
+  Serial.println("Serial Rxd is on pin: "+String(RX));
   pinMode(latPin, OUTPUT);
   digitalWrite(latPin, 0);
   Serial.println("ESP32 Command Tester for CubeSatWireless");
@@ -41,21 +41,36 @@ void loop() { //Choose Serial1 or Serial2 as required
   {
     incomingByte = Serial.read();
     c = (char) incomingByte;
-    //Serial.print(c);
+    Serial.print(c);
     output += c; 
   }
-  if((output.charAt(0) == 'T')||(count>1))
+  if(output.charAt(0) == 'T')
   {
  
       command = "UpdateN 770294ed-f345-4f8b-bf3e-063b52d314ab ";
       tempReading = analogRead(tempPin);  // read the input pin
+      //digitalWrite(latPin, 1);
+      Serial2.print(command);
+      Serial2.print(1);
+      Serial2.print(" ");
+      Serial.print(command);
+      Serial.print(tempReading);
+      delay(50);
+      //digitalWrite(latPin, 0);
+      Serial.println(count);
+  }
+ if((output.charAt(0) == 'P')||(count>1))
+  {
+ 
+      command = "UpdateN 770294ed-f345-4f8b-bf3e-063b52d314ab ";
+      //tempReading = analogRead(tempPin);  // read the input pin
       digitalWrite(latPin, 1);
       Serial2.print(command);
-      Serial2.print(tempReading);
+      Serial2.print(1);
       Serial2.print(" ");
-      //Serial.print(command);
-      //Serial.print(tempReading);
-      delay(500);
+      Serial.print(command);
+      Serial.print(tempReading);
+      delay(50);
       digitalWrite(latPin, 0);
       Serial.println(count);
       count++;
@@ -68,13 +83,13 @@ void loop() { //Choose Serial1 or Serial2 as required
       Serial2.print(command);
       Serial2.print(lightReading);
       Serial2.print(" ");
-      //Serial.print(command);
-      //Serial.println(lightReading);
-      delay(500);
+      Serial.print(command);
+      Serial.println(lightReading);
+      delay(50);
       digitalWrite(latPin, 0);
   }
   output = "";
-  delay(100);
+  delay(50);
   incomingByte = 0; // incoming byte from serial input
   c = ' ';
   output = "";
@@ -88,8 +103,8 @@ void loop() { //Choose Serial1 or Serial2 as required
   if(output != "")
   {
     digitalWrite(1, latPin);
-    //Serial.print("Recieved: ");
-    //Serial.println(output);
+    Serial.print("Recieved: ");
+    Serial.println(output);
     digitalWrite(0, latPin);
   }
   delay(50);
