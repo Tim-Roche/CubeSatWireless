@@ -248,7 +248,7 @@ void interpretCommand(std::string input)
     {
         Serial2.println(numConnected);
         Serial2.println("[Completed]");
-        //Serial.println("Read Complete!");
+        Serial.println("Read Complete!");
     }
     return;
   }
@@ -257,7 +257,7 @@ void interpretCommand(std::string input)
   it = charMap.find(UUID);
   if (it == charMap.end())
   {
-    //Serial.println("Cannot find in char map!");
+    Serial.println("Cannot find in char map!");
     return;
   }
   charStruct out = it->second;
@@ -267,7 +267,7 @@ void interpretCommand(std::string input)
     //Impliment Large Data support
     digitalWrite(latPin, 1);
      bleChar->writeValue(payload); 
-     //Serial.println("Update Complete!");
+     Serial.println("Update Complete!");
      Serial2.println("[Completed]");
     digitalWrite(latPin,0);
   }
@@ -275,7 +275,7 @@ void interpretCommand(std::string input)
   {
       int size = 0; //This is temporary until I impliment large data support again
       readCharecteristic(bleChar, size);
-      //Serial.println("Read Complete!");
+      Serial.println("Read Complete!");
   }
 
 }
@@ -379,10 +379,10 @@ void loop() {
   }
   else
   {
-    //Serial.println("0 are connected right now!");
+    Serial.println("0 are connected right now!");
     numConnected = 0;
   }
 
   checkForCommands();
-  delay(120);
+  //delay(10);
 }
