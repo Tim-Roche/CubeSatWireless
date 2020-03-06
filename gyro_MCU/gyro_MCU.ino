@@ -48,13 +48,18 @@ void setup()
   Serial.println("");
 }
 
+void sendAccel()
+{
+  Serial2.print("Accel X: "); Serial2.print((int)lsm.accelData.x); Serial2.print(" ");
+  Serial2.print("Y: "); Serial2.print((int)lsm.accelData.y);       Serial2.print(" ");
+  Serial.print("Z: "); Serial.println((int)lsm.accelData.z);       Serial2.print(" ");
+}
+
 void loop() 
 {
   lsm.read();
 
-  Serial.print("Accel X: "); Serial.print((int)lsm.accelData.x); Serial.print(" ");
-  Serial.print("Y: "); Serial.print((int)lsm.accelData.y);       Serial.print(" ");
-  Serial.print("Z: "); Serial.println((int)lsm.accelData.z);     Serial.print(" ");
+
   Serial.print("Mag X: "); Serial.print((int)lsm.magData.x);     Serial.print(" ");
   Serial.print("Y: "); Serial.print((int)lsm.magData.y);         Serial.print(" ");
   Serial.print("Z: "); Serial.println((int)lsm.magData.z);       Serial.print(" ");

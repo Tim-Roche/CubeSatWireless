@@ -66,8 +66,8 @@ void loop() { //Choose Serial1 or Serial2 as required
     Serial.print("Recieved: ");
     Serial.println(output);
     
-    //delay(10);
+    delay(20);
     digitalWrite(latPin, 0);
   }
-  //delay(10);
+  delay(10);
 }

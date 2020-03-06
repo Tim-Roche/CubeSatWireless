@@ -384,5 +384,5 @@ void loop() {
   }
 
   checkForCommands();
-  //delay(10);
+  delay(50);
 }
