@@ -160,15 +160,15 @@ void interpretCommand(std::string input)
     if(out != NULL)
     {
       //TODO: Need check to see if data needs the largeDataFunction
+      digitalWrite(latPin, 1);
       out->setValue(payload); 
       if(modifier == "UpdateN")
       {
-        digitalWrite(latPin, 1);
         readWriteNotif(UUID.c_str(), payload);
         sendNotify(out);
-        digitalWrite(latPin, 0);
       }
       Serial2.println("[Complete]");
+      digitalWrite(latPin, 0);
     }
     else
     {

@@ -1,7 +1,7 @@
 clear all
 clc
 disp("Reading....");
-m = readtable("delaytest (2).csv");
+m = readtable("test1.csv");
 m = table2array(m);
 disp("Done!");
 

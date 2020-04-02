@@ -14,10 +14,10 @@ std::map<std::string, BLECharacteristic*> charMap;
 std::map<std::string, std::string> notifMap;
 
 int latPin = 22;
-
 BLEServer *pServer = NULL;
 BLECharacteristic* pTestChar_1;
 
+int currentLocation = 0;
 bool deviceConnected = false;
 
 std::string readWriteNotif(std::string newValue, std::string data= "")
@@ -37,7 +37,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
   // TODO this doesn't take into account several clients being connected
     
     void onConnect(BLEServer* pServer) {
-      BLEDevice::setPower(ESP_PWR_LVL_N14);
+      BLEDevice::setPower(ESP_PWR_LVL_P3); //ESP_PWR_LVL_N14);
       BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
       pAdvertising->start();
       deviceConnected = true;
@@ -148,6 +148,7 @@ void interpretCommand(std::string input)
     if(out != NULL)
     {
       //TODO: Need check to see if data needs the largeDataFunction
+      digitalWrite(latPin, 1);
       out->setValue(payload); 
       if(modifier == "UpdateN")
       {
@@ -155,6 +156,7 @@ void interpretCommand(std::string input)
         sendNotify(out);
       }
       Serial2.println("[Complete]");
+      digitalWrite(latPin, 0);
     }
     else
     {
@@ -198,7 +200,13 @@ void init_UART()
 void setup()
 {
   init_UART();
-  //Serial.println("Payload");
+  pinMode(latPin, OUTPUT);
+  digitalWrite(latPin, 0);
+  delay(250);
+  digitalWrite(latPin, 1);
+  delay(1000);
+  digitalWrite(latPin, 0);
+  Serial.println("Payload");
   BLEDevice::init(payloadName.c_str());                                                      // Initialize the BLE device
   BLEDevice::setPower(ESP_PWR_LVL_N14);
   BLEServer *pServer = BLEDevice::createServer();                               // Save the BLE device server
@@ -272,16 +280,16 @@ void checkForCommands()
   }
 }
 
-void sendLargeData(BLECharacteristic* chr, uint8_t *image_p, int len)
-{
-  //Serial.println("Configuring Large Data");
-  currentLocation = 0;
-  largeDataSize = len;
-  int totalTranmissions = (len/TRANSMISSION_SIZE) + isNotZero(len%TRANSMISSION_SIZE);
-  //Serial.print("Total Transmissions: ");
-  //Serial.println(totalTranmissions);
-  sendNotify(chr, totalTranmissions);
-}
+//void sendLargeData(BLECharacteristic* chr, uint8_t *image_p, int len)
+//{
+//  //Serial.println("Configuring Large Data");
+//  currentLocation = 0;
+//  largeDataSize = len;
+//  int totalTranmissions = (len/TRANSMISSION_SIZE) + isNotZero(len%TRANSMISSION_SIZE);
+//  //Serial.print("Total Transmissions: ");
+//  //Serial.println(totalTranmissions);
+//  sendNotify(chr, totalTranmissions);
+//}
 
 void loop() {
   if (deviceConnected) {
@@ -292,8 +300,8 @@ void loop() {
   }
   else
   {
-     //Serial.print(BLEDevice::getAddress().toString().c_str());
-     //Serial.println(" Device is not Connected");
+     Serial.print(BLEDevice::getAddress().toString().c_str());
+     Serial.println(" Device is not Connected");
   } 
   checkForCommands();
   delay(120);

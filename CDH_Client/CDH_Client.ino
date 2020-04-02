@@ -298,10 +298,14 @@ void setup()
   //Latency Testing Initialization
   pinMode(latPin, OUTPUT);
   digitalWrite(latPin, 0);
+  delay(100);
+  digitalWrite(latPin, 1);
+  delay(1000);
+  digitalWrite(latPin, 0);
   ///////////////
   
   //Serial.println("CDH");
-  //User Charecteristic Registration Requirements
+  //User Charecteristic Registration Requirements 
   //Eventually there will be a way for user to enter what they want charecteristics they want to register for
   //For now its hard coded. Deal with it.
   charMap.insert(std::pair<std::string,charStruct>("f9fd0006-71ae-42c4-bd19-9d5e37ebf073",charStruct(REGNOTIF, "f9fd0006-71ae-42c4-bd19-9d5e37ebf073")));
@@ -312,7 +316,7 @@ void setup()
   charMap.insert(std::pair<std::string,charStruct>("5276084c-0f40-4e15-be7f-9ba118ccfdd9",charStruct(REGNOTIF, "5276084c-0f40-4e15-be7f-9ba118ccfdd9")));
   
   BLEDevice::init("CDH");
-  BLEDevice::setPower(ESP_PWR_LVL_N14);
+  BLEDevice::setPower(ESP_PWR_LVL_P3); //ESP_PWR_LVL_N14);
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setInterval(1349);
@@ -379,6 +383,7 @@ void loop() {
   }
   else
   {
+    Serial.print(BLEDevice::getAddress().toString().c_str());
     Serial.println("0 are connected right now!");
     numConnected = 0;
   }
