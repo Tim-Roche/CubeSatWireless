@@ -155,12 +155,12 @@ void interpretCommand(std::string input)
         readWriteNotif(UUID.c_str(), payload);
         sendNotify(out);
       }
-      Serial2.println("[Complete]");
+      Serial.println("[Complete]");
       digitalWrite(latPin, 0);
     }
     else
     {
-      Serial2.println("[Invalid Syntax]");
+      Serial.println("[Invalid Syntax]");
       Serial.println("Improper Syntax!");
     }
   }
