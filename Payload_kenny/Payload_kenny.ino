@@ -129,13 +129,9 @@ void sendNotify(BLECharacteristic* chr, int notif = 0)
 
 void interpretCommand(std::string input)
 {
-  //command = "UpdateN 5276084c-0f40-4e15-be7f-9ba118ccfdd9 ";
-  input = "UpdateN 770294ed-f345-4f8b-bf3e-063b52d314ab 10 "; 
   std::string modifier = getValue(input, ' ', 0);
   std::string  UUID    = getValue(input, ' ', 1);
   std::string  payload   = getValue(input, ' ' , 2, true); //guard = true, allows for spaces in data
-
-
   //Serial.print("Modifier: ");
   //Serial.println(modifier.c_str());
   //Serial.print("UUID: ");
@@ -159,12 +155,12 @@ void interpretCommand(std::string input)
         readWriteNotif(UUID.c_str(), payload);
         sendNotify(out);
       }
-      Serial2.println("[Complete]");
+      Serial.println("[Complete]");
       digitalWrite(latPin, 0);
     }
     else
     {
-      Serial2.println("[Invalid Syntax]");
+      Serial.println("[Invalid Syntax]");
       Serial.println("Improper Syntax!");
     }
   }
@@ -177,17 +173,17 @@ void interpretCommand(std::string input)
       //TODO: Need check to see if data needs the largeDataFunction
       std::string outputString = out->getValue();
       //Serial.println(outputString.c_str());
-      //Serial2.println(outputString.c_str());
+      //Serial.println(outputString.c_str());
     }
     else
     {
-      Serial2.println("[Invalid Syntax]");
+      Serial.println("[Invalid Syntax]");
       Serial.println("Improper Syntax!");
     }
   }
   if(modifier == "Echo")
   {
-    Serial2.println(UUID.c_str());
+    Serial.println(UUID.c_str());
   }
 }
 
@@ -196,7 +192,7 @@ void interpretCommand(std::string input)
 void init_UART()
 {
   Serial.begin(115200);   
-  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial.begin(9600, SERIAL_8N1, RXD2, TXD2);
   //Serial.println("Serial Txd is on pin: "+String(TX));
   //Serial.println("Serial Rxd is on pin: "+String(RX));
 }
@@ -271,9 +267,9 @@ void checkForCommands()
   char c;
   String output = "";
 
-  while (Serial2.available() > 0) 
+  while (Serial.available() > 0) 
   {
-    incomingByte = Serial2.read();
+    incomingByte = Serial.read();
     c = (char) incomingByte;
     //Serial.print(c);
     output += c; 
