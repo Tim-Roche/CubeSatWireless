@@ -130,13 +130,10 @@ void sendNotify(BLECharacteristic* chr, int notif = 0)
 void interpretCommand(std::string input)
 {
   //command = "UpdateN 5276084c-0f40-4e15-be7f-9ba118ccfdd9 ";
-  //std::string modifier = getValue(input, ' ', 0);
-  //std::string  UUID    = getValue(input, ' ', 1);
-  //std::string  payload   = getValue(input, ' ' , 2, true); //guard = true, allows for spaces in data
-  //HARD CODED IN 
-  std::string modifier = "UpdateN";
-  std::string UUID = "5276084c-0f40-4e15-be7f-9ba118ccfdd9";
-  std::string payload = "1234"; //Change this line to change what is sent
+  input = "UpdateN 770294ed-f345-4f8b-bf3e-063b52d314ab 10 "; 
+  std::string modifier = getValue(input, ' ', 0);
+  std::string  UUID    = getValue(input, ' ', 1);
+  std::string  payload   = getValue(input, ' ' , 2, true); //guard = true, allows for spaces in data
 
 
   //Serial.print("Modifier: ");
