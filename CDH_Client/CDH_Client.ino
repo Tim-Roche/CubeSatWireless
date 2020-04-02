@@ -237,8 +237,8 @@ void interpretCommand(std::string input)
   std::string  payload   = getValue(input, ' ' , 2, true); //guard = true, allows for spaces in data
   //Serial.print("Modifier: ");
   //Serial.println(modifier.c_str());
-  //Serial.print("UUID: ");
-  //Serial.println(UUID.c_str());
+  Serial.print("UUID: ");
+  Serial.println(UUID.c_str());
   //Serial.print("Payload: ");
   //Serial.println(payload.c_str());
 
