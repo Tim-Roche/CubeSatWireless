@@ -155,12 +155,12 @@ void interpretCommand(std::string input)
         readWriteNotif(UUID.c_str(), payload);
         sendNotify(out);
       }
-      Serial.println("[Complete]");
+      Serial2.println("[Complete]");
       digitalWrite(latPin, 0);
     }
     else
     {
-      Serial.println("[Invalid Syntax]");
+      Serial2.println("[Invalid Syntax]");
       Serial.println("Improper Syntax!");
     }
   }
@@ -173,17 +173,17 @@ void interpretCommand(std::string input)
       //TODO: Need check to see if data needs the largeDataFunction
       std::string outputString = out->getValue();
       //Serial.println(outputString.c_str());
-      //Serial.println(outputString.c_str());
+      //Serial2.println(outputString.c_str());
     }
     else
     {
-      Serial.println("[Invalid Syntax]");
+      Serial2.println("[Invalid Syntax]");
       Serial.println("Improper Syntax!");
     }
   }
   if(modifier == "Echo")
   {
-    Serial.println(UUID.c_str());
+    Serial2.println(UUID.c_str());
   }
 }
 
@@ -192,7 +192,7 @@ void interpretCommand(std::string input)
 void init_UART()
 {
   Serial.begin(115200);   
-  Serial.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   //Serial.println("Serial Txd is on pin: "+String(TX));
   //Serial.println("Serial Rxd is on pin: "+String(RX));
 }
