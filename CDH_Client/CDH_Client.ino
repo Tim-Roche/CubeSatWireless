@@ -49,6 +49,7 @@ static void notifyCallback(
     //Serial.println(*pData);
     //Serial.print(" of data length ");
     //Serial.println(length);*/
+    digitalWrite(latPin, 1);
     messageReadWaitlist.push( std::pair<BLERemoteCharacteristic*, uint8_t>(pBLERemoteCharacteristic, *pData));
 }
 
@@ -265,11 +266,9 @@ void interpretCommand(std::string input)
   if (modifier == "Update")
   {
     //Impliment Large Data support
-    digitalWrite(latPin, 1);
      bleChar->writeValue(payload); 
      Serial.println("Update Complete!");
      Serial2.println("[Completed]");
-    digitalWrite(latPin,0);
   }
   if (modifier == "Read")
   {
@@ -296,6 +295,7 @@ void setup()
   init_UART();
   
   //Latency Testing Initialization
+  Serial.println("Test Square!");
   pinMode(latPin, OUTPUT);
   digitalWrite(latPin, 0);
   delay(100);
@@ -348,6 +348,7 @@ void checkInbox()
 {
   if(messageReadWaitlist.size() != 0)
   {
+    
     //Serial.print("New Message in Inbox! Messages Unread: ");
     //Serial.println(messageReadWaitlist.size());
     std::pair<BLERemoteCharacteristic*,uint8_t> notifyPair = messageReadWaitlist.top();
@@ -358,6 +359,7 @@ void checkInbox()
     //Serial.print("Read Time: ");
     //Serial.println(millis() - t);
     messageReadWaitlist.pop();
+    digitalWrite(latPin, 0);
   }
 }
 

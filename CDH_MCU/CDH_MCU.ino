@@ -21,12 +21,12 @@ void setup()
   Serial.println("ESP32 Command Tester for CubeSatWireless");
   pinMode(latPin, OUTPUT);
   digitalWrite(latPin, 0);
- /* Serial.println("Test Square Begins");
+ Serial.println("Test Square Begins");
   digitalWrite(latPin, 1);
-  //delay(1000);
+  delay(1000);
   digitalWrite(latPin, 0);
-  //delay(500);
-  Serial.println("Test Square Ends"); */
+  delay(500);
+  Serial.println("Test Square Ends"); 
   
 }
 
