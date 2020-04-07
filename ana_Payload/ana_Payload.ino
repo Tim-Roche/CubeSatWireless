@@ -36,7 +36,7 @@ std::string readWriteNotif(std::string newValue, std::string data= "")
 class MyServerCallbacks: public BLEServerCallbacks {
   // TODO this doesn't take into account several clients being connected
     
-    void onConnect(BLEServer* pServer) {
+    void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t *param) {
       esp_ble_conn_update_params_t conn_params = {0};
       memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
       conn_params.latency = 0; //number of skippable connection events
