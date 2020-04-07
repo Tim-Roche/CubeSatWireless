@@ -17,6 +17,8 @@ int latPin = 22;
 BLEServer *pServer = NULL;
 BLECharacteristic* pTestChar_1;
 
+int count = 0;
+
 int currentLocation = 0;
 bool deviceConnected = false;
 
@@ -265,7 +267,7 @@ void checkForCommands()
 {
   int incomingByte = 0; // incoming byte from serial input
   char c;
-  String output = "";
+  std::string output = "";
 
   while (Serial.available() > 0) 
   {
@@ -276,7 +278,21 @@ void checkForCommands()
   }
   if(output != "")
   {
-    interpretCommand(output.c_str());
+     if((output[0] == 'P')||(count>1))
+      {
+      output = "UpdateN 770294ed-f345-4f8b-bf3e-063b52d314ab ";
+      interpretCommand(output);
+      Serial.print(output.c_str());
+      Serial.print("1234 ");
+      delay(50);
+      Serial.println(count);
+      count++;
+    }
+    else
+    {
+      count = 0;
+      interpretCommand(output);
+    }
   }
 }
 
