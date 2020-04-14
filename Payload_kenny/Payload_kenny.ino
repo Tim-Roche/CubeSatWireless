@@ -289,11 +289,11 @@ void checkForCommands()
   {
      if((output[0] == 'P')||(count>1))
       {
-      output = "UpdateN 770294ed-f345-4f8b-bf3e-063b52d314ab ";
+      output = "UpdateN 770294ed-f345-4f8b-bf3e-063b52d314ab 1234 ";
       interpretCommand(output);
       Serial.print(output.c_str());
-      Serial.print("1234 ");
       delay(50);
+      Serial.println(" | TX Num:")
       Serial.println(count);
       count++;
     }
