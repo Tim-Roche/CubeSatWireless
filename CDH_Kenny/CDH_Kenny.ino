@@ -6,6 +6,8 @@
 #include "charStruct.h"
 #include "parser.h" //For parsing functions, its really small right now but it should grow in the future
 #include <string>
+
+int count =0;
   
 //UART COMMS
 #define RXD2 16
