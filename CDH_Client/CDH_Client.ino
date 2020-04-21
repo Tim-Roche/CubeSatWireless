@@ -316,7 +316,7 @@ void setup()
   charMap.insert(std::pair<std::string,charStruct>("5276084c-0f40-4e15-be7f-9ba118ccfdd9",charStruct(REGNOTIF, "5276084c-0f40-4e15-be7f-9ba118ccfdd9")));
   
   BLEDevice::init("CDH");
-  BLEDevice::setPower(ESP_PWR_LVL_P3); //ESP_PWR_LVL_N14);
+  BLEDevice::setPower(ESP_PWR_LVL_N14);
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setInterval(1349);

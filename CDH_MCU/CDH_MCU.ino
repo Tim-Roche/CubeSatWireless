@@ -18,7 +18,7 @@ void setup()
   Serial.begin(115200);
   //Serial1.begin(9600, SERIAL_8N1, RXD2, TXD2);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
-  Serial.println("ESP32 Command Tester for CubeSatWireless");
+  Serial.println("CDH ESP32 Command Tester for CubeSatWireless");
   pinMode(latPin, OUTPUT);
   digitalWrite(latPin, 0);
  Serial.println("Test Square Begins");

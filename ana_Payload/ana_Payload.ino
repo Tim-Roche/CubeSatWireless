@@ -48,7 +48,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
 
 
 
-      BLEDevice::setPower(ESP_PWR_LVL_P3); //ESP_PWR_LVL_N14);
+      BLEDevice::setPower(ESP_PWR_LVL_N14); //ESP_PWR_LVL_N14);
       BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
       pAdvertising->start();
       deviceConnected = true;
