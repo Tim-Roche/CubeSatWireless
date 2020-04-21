@@ -1,7 +1,7 @@
 clear all
 clc
 disp("Reading....");
-m = readtable("mcumcunobox1.csv");
+m = readtable("mcumcu421_14dbm.csv");
 m = table2array(m);
 disp("Done!");
 

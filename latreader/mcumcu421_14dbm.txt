@@ -1,0 +1,7 @@
+Reading....
+Done!
+WARNING: 668=/=667
+Total Amount: 667
+Average: 0.19647
+Max: 0.2846
+Min: 0.1232

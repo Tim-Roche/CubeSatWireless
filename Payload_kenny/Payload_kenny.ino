@@ -79,7 +79,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       
       if(hit.equals(BLETEMP))
       {
-         //Serial.println("BLE TEMP!");
+         Serial.println("Sucessful Write! BLE TEMP!");
          std::string output = readWriteNotif(TEMP_CHAR);
          notifMap.erase(TEMP_CHAR);
          if(output != "")
@@ -89,7 +89,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       }
       if(hit.equals(BLELIGHT))
       {
-         //Serial.println("BLE LIGHT!");
+         Serial.println("Sucessful Write! BLE LIGHT!");
          std::string output = readWriteNotif(LIGHT_CHAR);
          notifMap.erase(LIGHT_CHAR);
          if(output != "")
