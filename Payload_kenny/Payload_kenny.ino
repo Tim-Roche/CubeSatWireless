@@ -18,7 +18,7 @@ BLEServer *pServer = NULL;
 BLECharacteristic* pTestChar_1;
 
 int count = 0;
-
+int maxCount = 1000;
 int currentLocation = 0;
 bool deviceConnected = false;
 
@@ -290,16 +290,23 @@ void checkForCommands()
       count = 0;
       interpretCommand(output);
     }
-   if((output[0] == 'P')||(count>0))
+   if((output[0] == 'P')||((count>0)&&(count<maxCount)))
     {
-    output = "UpdateN 770294ed-f345-4f8b-bf3e-063b52d314ab 1234 ";
-    interpretCommand(output);
-    Serial.print(output.c_str());
-    delay(50);
-    Serial.print(" | TX Num:");
-    Serial.print(count);
-    Serial.println();
-    count++;
+      std::string modifier = getValue(output, ' ', 1);
+      if(modifier != "")
+      {
+        maxCount = atoi(modifier.c_str());
+      }
+      output = "UpdateN 770294ed-f345-4f8b-bf3e-063b52d314ab 1234 ";
+      interpretCommand(output);
+      Serial.print(output.c_str());
+      delay(50);
+      Serial.print(" | TX Num:");
+      Serial.print(count);
+      Serial.print("/");
+      Serial.print(maxCount);
+      Serial.println();
+      count++;
   }
 }
 
