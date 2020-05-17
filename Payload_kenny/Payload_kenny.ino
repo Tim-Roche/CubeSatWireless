@@ -14,6 +14,8 @@ std::map<std::string, BLECharacteristic*> charMap;
 std::map<std::string, std::string> notifMap;
 
 int latPin = 22;
+int LEDpin = 2;
+
 BLEServer *pServer = NULL;
 BLECharacteristic* pTestChar_1;
 
@@ -48,15 +50,17 @@ class MyServerCallbacks: public BLEServerCallbacks {
       //start sent the update connection parameters to the peer device.
       esp_ble_gap_update_conn_params(&conn_params);
 
-      BLEDevice::setPower(ESP_PWR_LVL_P3); //ESP_PWR_LVL_N14);
+      BLEDevice::setPower(ESP_PWR_LVL_N14); //ESP_PWR_LVL_N14);
       BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
       pAdvertising->start();
       deviceConnected = true;
+      digitalWrite(LEDpin,1);
       //Serial.println("I connected!");
     };
     
     void onDisconnect(BLEServer* pServer) {
       //Serial.println("I Disconnected!");
+      digitalWrite(LEDpin,0);
       deviceConnected = false;
     }  
 };
@@ -211,6 +215,8 @@ void init_UART()
 void setup()
 {
   init_UART();
+  pinMode(LEDpin, OUTPUT);
+  digitalWrite(LEDpin,0);
   pinMode(latPin, OUTPUT);
   digitalWrite(latPin, 0);
   delay(250);
@@ -219,7 +225,7 @@ void setup()
   digitalWrite(latPin, 0);
   Serial.println("Payload");
   BLEDevice::init(payloadName.c_str());                                                      // Initialize the BLE device
-  BLEDevice::setPower(ESP_PWR_LVL_N14);
+  //BLEDevice::setPower(ESP_PWR_LVL_N14);
   BLEServer *pServer = BLEDevice::createServer();                               // Save the BLE device server
 
   //Creating Services
@@ -288,9 +294,10 @@ void checkForCommands()
     if((output[0] != 'P')&&(output != ""))
     {
       count = 0;
+      maxCount = 0;
       interpretCommand(output);
     }
-   if((output[0] == 'P')||((count>0)&&(count<maxCount)))
+   if((1==1)||(output[0] == 'P')||((count>0)&&(count<maxCount)))
     {
       std::string modifier = getValue(output, ' ', 1);
       if(modifier != "")
@@ -327,12 +334,13 @@ void loop() {
      ////Serial.println("Sending Notification!");
 
      //sendLargeData(pTestChar_1, image_p, iLen_int);
+     checkForCommands();
   }
   else
   {
      Serial.print(BLEDevice::getAddress().toString().c_str());
      Serial.println(" Device is not Connected");
   } 
-  checkForCommands();
+  //checkForCommands();
   delay(120);
 }

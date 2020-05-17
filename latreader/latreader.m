@@ -1,7 +1,7 @@
 clear all
 clc
 disp("Reading....");
-m = readtable("bleble421_14dbm.csv");
+m = readtable("bleble_inbox_427_1.csv");
 m = table2array(m);
 disp("Done!");
 
@@ -29,4 +29,5 @@ disp("Total Amount: "+ length(deltas));
 disp("Average: " + mean(deltas));
 disp("Max: " + max(deltas));
 disp("Min: " + min(deltas));
+disp("Var: " + var(deltas));
 

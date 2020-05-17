@@ -7,8 +7,9 @@
 #include "parser.h" //For parsing functions, its really small right now but it should grow in the future
 #include <string>
 
-int count =0;
-  
+int count =0 ;
+int LEDpin = 2;
+
 //UART COMMS
 #define RXD2 16
 #define TXD2 17
@@ -34,7 +35,7 @@ boolean scanning = true;
 //Characteristic Map
 byte REGNOTIF = 0x01;
 byte MEGADATA = 0x02;
-std::map<std::string, charStruct> charMap; //Current handles notification registration
+std::map<std::string, charStruct> charMap; //Current handless notification registration
 std::stack <BLEAdvertisedDevice*> connectionWaitlist; 
 std::stack < std::pair<BLERemoteCharacteristic*,uint8_t > > messageReadWaitlist;
 
@@ -61,9 +62,12 @@ class MyClientCallback : public BLEClientCallbacks {
         numConnected++;
         Serial.print("Devices Connected: ");
         Serial.println(numConnected);
+        BLEDevice::setPower(ESP_PWR_LVL_P7);
+        digitalWrite(LEDpin, 1);
   }
 
   void onDisconnect(BLEClient* pclient) {
+    digitalWrite(LEDpin, 0);
     Serial.printf("device disconnected: %s\n", pclient->getPeerAddress().toString().c_str());
     Serial.println("onDisconnect");
     numConnected--;
@@ -295,7 +299,8 @@ void init_UART()
 void setup() 
 {  
   init_UART();
-  
+  pinMode(LEDpin, OUTPUT);
+  digitalWrite(LEDpin,0);
   //Latency Testing Initialization
   Serial.println("Test Square!");
   pinMode(latPin, OUTPUT);
@@ -318,7 +323,7 @@ void setup()
   charMap.insert(std::pair<std::string,charStruct>("5276084c-0f40-4e15-be7f-9ba118ccfdd9",charStruct(REGNOTIF, "5276084c-0f40-4e15-be7f-9ba118ccfdd9")));
   
   BLEDevice::init("CDH");
-  //BLEDevice::setPower(ESP_PWR_LVL_N14);
+  
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setInterval(1349);

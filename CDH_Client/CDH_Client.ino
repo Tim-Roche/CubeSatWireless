@@ -14,6 +14,9 @@
 //Latency Testing
 int latPin = 22;
 
+//LED
+int LEDpin = 2;
+
 //Device Configuration
 static BLEAddress deviceAddr1 = BLEAddress("3c:71:bf:f9:f1:6a");
 static BLEAddress deviceAddr2 = BLEAddress("cc:50:e3:a8:40:fe");
@@ -59,6 +62,7 @@ class MyClientCallback : public BLEClientCallbacks {
         numConnected++;
         Serial.print("Devices Connected: ");
         Serial.println(numConnected);
+        digitalWrite(LEDpin, 1);
   }
 
   void onDisconnect(BLEClient* pclient) {
@@ -68,6 +72,7 @@ class MyClientCallback : public BLEClientCallbacks {
     lastEvent = millis(); //Start the search for the disconnected module
     Serial.print("Devices Connected: ");
     Serial.println(numConnected);
+    digitalWrite(LEDpin, 0);
   }
 };
 
@@ -293,7 +298,8 @@ void init_UART()
 void setup() 
 {  
   init_UART();
-  
+  pinMode(LEDpin, OUTPUT);
+  digitalWrite(LEDpin, 0);
   //Latency Testing Initialization
   Serial.println("Test Square!");
   pinMode(latPin, OUTPUT);
